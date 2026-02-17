@@ -1,4 +1,4 @@
-import {fetchSanity, type SanityImage, valueToToken} from '@/lib/sanity'
+import {cleanSanityString, fetchSanity, type SanityImage, valueToToken} from '@/lib/sanity'
 
 export type AttributeDefinition = {
   _id: string
@@ -183,6 +183,73 @@ const DEFAULT_CONFIGURATOR_CONFIG: ConfiguratorConfig = {
   defaultPageSize: 20,
   enableSkuSearch: true,
   enableStockOnlyToggle: true,
+}
+
+const ATTRIBUTE_VALUE_TYPE_MAP: Record<string, AttributeDefinition['valueType']> = {
+  number: 'number',
+  boolean: 'boolean',
+  text: 'text',
+  singleoption: 'singleOption',
+  multioption: 'multiOption',
+}
+
+function normalizeAttributeValueType(
+  rawValue: AttributeDefinition['valueType'] | string | undefined,
+): AttributeDefinition['valueType'] {
+  const token = valueToToken(rawValue || '')
+  return ATTRIBUTE_VALUE_TYPE_MAP[token] ?? 'text'
+}
+
+function normalizeUiControl(uiControl: string | undefined) {
+  const cleaned = cleanSanityString(uiControl)
+  return cleaned ? valueToToken(cleaned) : undefined
+}
+
+function normalizeAttributeDefinition(
+  definition: AttributeDefinition | undefined,
+): AttributeDefinition | undefined {
+  if (!definition) {
+    return undefined
+  }
+
+  return {
+    ...definition,
+    key: cleanSanityString(definition.key),
+    title: definition.title ? cleanSanityString(definition.title) : definition.title,
+    valueType: normalizeAttributeValueType(definition.valueType),
+    unit: definition.unit ? cleanSanityString(definition.unit) : definition.unit,
+    uiControl: normalizeUiControl(definition.uiControl),
+  }
+}
+
+function normalizeAttributeValue(attribute: AttributeValue): AttributeValue {
+  return {
+    ...attribute,
+    definition: normalizeAttributeDefinition(attribute.definition),
+  }
+}
+
+function normalizeVariant(variant: ProductVariant): ProductVariant {
+  return {
+    ...variant,
+    configSelections: (variant.configSelections ?? []).map(normalizeAttributeValue),
+    specAttributes: (variant.specAttributes ?? []).map(normalizeAttributeValue),
+  }
+}
+
+function normalizeProductCard(product: ProductCard): ProductCard {
+  return {
+    ...product,
+    variants: (product.variants ?? []).map(normalizeVariant),
+  }
+}
+
+function normalizeProductDetail(product: ProductDetail): ProductDetail {
+  return {
+    ...product,
+    variants: (product.variants ?? []).map(normalizeVariant),
+    productAttributes: (product.productAttributes ?? []).map(normalizeAttributeValue),
+  }
 }
 
 const LISTING_QUERY = `{
@@ -393,34 +460,50 @@ const CONFIGURATOR_QUERY = `{
 export async function getListingData() {
   const result = await fetchSanity<ListingRawResponse | null>(LISTING_QUERY)
   const config = result?.config ?? DEFAULT_LISTING_CONFIG
+  const normalizedFilterDefinitions = (config.filterDefinitions ?? [])
+    .map(normalizeAttributeDefinition)
+    .filter((definition): definition is AttributeDefinition => Boolean(definition?.key))
+  const normalizedCardDefinitions = (config.cardAttributeDefinitions ?? [])
+    .map(normalizeAttributeDefinition)
+    .filter((definition): definition is AttributeDefinition => Boolean(definition?.key))
 
   return {
     config: {
       ...DEFAULT_LISTING_CONFIG,
       ...config,
-      filterDefinitions: config.filterDefinitions ?? [],
-      cardAttributeDefinitions: config.cardAttributeDefinitions ?? [],
+      filterDefinitions: normalizedFilterDefinitions,
+      cardAttributeDefinitions: normalizedCardDefinitions,
       tabs: config.tabs ?? DEFAULT_LISTING_CONFIG.tabs,
     },
     options: result?.options ?? [],
-    products: result?.products ?? [],
+    products: (result?.products ?? []).map(normalizeProductCard),
   }
 }
 
 export async function getProductBySlug(slug: string) {
-  return fetchSanity<ProductDetail | null>(PRODUCT_QUERY, {slug})
+  const product = await fetchSanity<ProductDetail | null>(PRODUCT_QUERY, {slug})
+  return product ? normalizeProductDetail(product) : null
 }
 
 export async function getConfiguratorBySlug(slug: string) {
   const result = await fetchSanity<ConfiguratorData | null>(CONFIGURATOR_QUERY, {slug})
   const config = result?.config ?? DEFAULT_CONFIGURATOR_CONFIG
+  const normalizedFilterDefinitions = (config.filterDefinitions ?? [])
+    .map(normalizeAttributeDefinition)
+    .filter((definition): definition is AttributeDefinition => Boolean(definition?.key))
+  const normalizedTableColumns = (config.tableColumns ?? [])
+    .map(normalizeAttributeDefinition)
+    .filter((definition): definition is AttributeDefinition => Boolean(definition?.key))
+  const normalizedVisibleColumns = (config.defaultVisibleColumns ?? [])
+    .map(normalizeAttributeDefinition)
+    .filter((definition): definition is AttributeDefinition => Boolean(definition?.key))
 
   return {
-    product: result?.product ?? null,
+    product: result?.product ? normalizeProductDetail(result.product) : null,
     config: {
-      filterDefinitions: config.filterDefinitions ?? [],
-      tableColumns: config.tableColumns ?? [],
-      defaultVisibleColumns: config.defaultVisibleColumns ?? [],
+      filterDefinitions: normalizedFilterDefinitions,
+      tableColumns: normalizedTableColumns,
+      defaultVisibleColumns: normalizedVisibleColumns,
       pageSizeOptions: config.pageSizeOptions ?? DEFAULT_CONFIGURATOR_CONFIG.pageSizeOptions,
       defaultPageSize: config.defaultPageSize ?? DEFAULT_CONFIGURATOR_CONFIG.defaultPageSize,
       enableSkuSearch: config.enableSkuSearch ?? DEFAULT_CONFIGURATOR_CONFIG.enableSkuSearch,
@@ -493,7 +576,8 @@ export function pickAttribute(values: AttributeValue[] | undefined, key: string)
     return undefined
   }
 
-  return values.find((item) => item.definition?.key === key)
+  const cleanedKey = cleanSanityString(key)
+  return values.find((item) => cleanSanityString(item.definition?.key) === cleanedKey)
 }
 
 export function filterVariantsBySelections(
@@ -526,7 +610,7 @@ export function filterVariantsBySelections(
       }
 
       if (
-        attribute.definition?.valueType === 'number' &&
+        normalizeAttributeValueType(attribute.definition?.valueType) === 'number' &&
         selectedTokens.length === 1 &&
         typeof attribute.numberValue === 'number'
       ) {

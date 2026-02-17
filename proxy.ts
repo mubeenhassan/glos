@@ -17,8 +17,58 @@ const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'glos'
 const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? '2024-01-01'
 const readToken = process.env.SANITY_API_READ_TOKEN
 const cacheTtlMs = 60_000
+const isDev = process.env.NODE_ENV !== 'production'
 
 let redirectCache: RedirectCache | null = null
+
+function toSafeOrigin(value: string) {
+  try {
+    return new URL(value).origin
+  } catch {
+    return 'http://localhost:3333'
+  }
+}
+
+const studioOrigin = toSafeOrigin(
+  process.env.SANITY_STUDIO_URL ?? process.env.NEXT_PUBLIC_SANITY_STUDIO_URL ?? 'http://localhost:3333',
+)
+
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io",
+  `connect-src 'self' https://*.sanity.io https://cdn.sanity.io${isDev ? ' ws: wss:' : ''}`,
+  "frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  `frame-ancestors 'self' ${studioOrigin}`,
+  ...(isDev ? [] : ['upgrade-insecure-requests']),
+].join('; ')
+
+const securityHeaders: Record<string, string> = {
+  'Content-Security-Policy': contentSecurityPolicy,
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'X-DNS-Prefetch-Control': 'on',
+  'X-Download-Options': 'noopen',
+}
+
+if (!isDev) {
+  securityHeaders['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload'
+}
+
+function withSecurityHeaders(response: NextResponse) {
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
+  response.headers.set('X-Request-ID', crypto.randomUUID())
+  return response
+}
 
 function normalizePath(pathname: string) {
   if (!pathname.startsWith('/')) {
@@ -35,9 +85,24 @@ function isIgnoredPath(pathname: string) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname === '/favicon.ico' ||
+    pathname === '/favicon.png' ||
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml'
   )
+}
+
+function hasSuspiciousPath(pathname: string) {
+  const suspiciousPatterns = [/\.\./, /%2e%2e/i, /\\/, /\/\/+/, /\.(env|git|svn)/i]
+  return suspiciousPatterns.some((pattern) => pattern.test(pathname))
+}
+
+function hasSuspiciousQuery(searchParams: URLSearchParams) {
+  const query = decodeURIComponent(searchParams.toString()).toLowerCase()
+  return query.includes('<script') || query.includes('javascript:') || query.includes('%0a') || query.includes('%0d')
+}
+
+function isSafeRedirectDestination(url: URL) {
+  return url.protocol === 'http:' || url.protocol === 'https:'
 }
 
 async function fetchRedirects() {
@@ -69,27 +134,38 @@ async function fetchRedirects() {
 export async function proxy(request: NextRequest) {
   const currentPath = normalizePath(request.nextUrl.pathname)
 
+  if (hasSuspiciousPath(currentPath) || hasSuspiciousQuery(request.nextUrl.searchParams)) {
+    return withSecurityHeaders(new NextResponse('Bad Request', {status: 400}))
+  }
+
   if (isIgnoredPath(currentPath)) {
-    return NextResponse.next()
+    return withSecurityHeaders(NextResponse.next())
   }
 
   const redirects = await fetchRedirects()
   const match = redirects.find((item) => normalizePath(item.source) === currentPath)
 
   if (!match) {
-    return NextResponse.next()
+    return withSecurityHeaders(NextResponse.next())
   }
 
-  const destinationUrl = new URL(match.destination, request.url)
-  const targetPath = normalizePath(destinationUrl.pathname)
-  if (targetPath === currentPath) {
-    return NextResponse.next()
-  }
+  try {
+    const destinationUrl = new URL(match.destination, request.url)
+    if (!isSafeRedirectDestination(destinationUrl)) {
+      return withSecurityHeaders(NextResponse.next())
+    }
 
-  return NextResponse.redirect(destinationUrl, match.permanent ? 301 : 302)
+    const targetPath = normalizePath(destinationUrl.pathname)
+    if (targetPath === currentPath && destinationUrl.origin === request.nextUrl.origin) {
+      return withSecurityHeaders(NextResponse.next())
+    }
+
+    return withSecurityHeaders(NextResponse.redirect(destinationUrl, match.permanent ? 301 : 302))
+  } catch {
+    return withSecurityHeaders(NextResponse.next())
+  }
 }
 
 export const config = {
-  matcher: '/:path*',
+  matcher: ['/((?!_next/static|_next/image|api|favicon.ico|favicon.png|robots.txt|sitemap.xml).*)'],
 }
-

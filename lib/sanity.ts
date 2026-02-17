@@ -102,6 +102,14 @@ export function mediaImageUrl(media: MediaItemLike | null | undefined, width = 1
   return sanityImageUrl(media.image, width)
 }
 
+export function cleanSanityString(value: string | null | undefined) {
+  if (typeof value !== 'string') {
+    return ''
+  }
+
+  return stegaClean(value).trim()
+}
+
 export function valueToToken(value: string) {
-  return stegaClean(value).trim().toLowerCase()
+  return cleanSanityString(value).toLowerCase()
 }
