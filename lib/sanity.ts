@@ -3,8 +3,15 @@ import {createClient} from '@sanity/client'
 import {stegaClean} from '@sanity/client/stega'
 import {draftMode} from 'next/headers'
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? 'v5u3xa8m'
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'glos'
+function requireEnv(value: string | undefined, name: string) {
+  if (!value) {
+    throw new Error(`Missing environment variable: ${name}`)
+  }
+  return value
+}
+
+const projectId = requireEnv(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID, 'NEXT_PUBLIC_SANITY_PROJECT_ID')
+const dataset = requireEnv(process.env.NEXT_PUBLIC_SANITY_DATASET, 'NEXT_PUBLIC_SANITY_DATASET')
 const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? '2024-01-01'
 const readToken = process.env.SANITY_API_READ_TOKEN
 const useCdn = process.env.NEXT_PUBLIC_SANITY_USE_CDN === 'true'

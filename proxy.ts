@@ -12,26 +12,27 @@ type RedirectCache = {
   items: RedirectRule[]
 }
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? 'v5u3xa8m'
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'glos'
 const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? '2024-01-01'
 const readToken = process.env.SANITY_API_READ_TOKEN
 const cacheTtlMs = 60_000
 const isDev = process.env.NODE_ENV !== 'production'
 
 let redirectCache: RedirectCache | null = null
-
-function toSafeOrigin(value: string) {
-  try {
-    return new URL(value).origin
-  } catch {
-    return 'http://localhost:3333'
+function requireEnv(value: string | undefined, name: string) {
+  if (!value) {
+    throw new Error(`Missing environment variable: ${name}`)
   }
+  return value
 }
 
-const studioOrigin = toSafeOrigin(
-  process.env.SANITY_STUDIO_URL ?? process.env.NEXT_PUBLIC_SANITY_STUDIO_URL ?? 'http://localhost:3333',
-)
+const projectId = requireEnv(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID, 'NEXT_PUBLIC_SANITY_PROJECT_ID')
+const dataset = requireEnv(process.env.NEXT_PUBLIC_SANITY_DATASET, 'NEXT_PUBLIC_SANITY_DATASET')
+
+const allowedFrameAncestors = [
+  'http://localhost:3333',
+  `https://${projectId}.sanity.studio`,
+]
+const frameAncestorsDirective = ["'self'", ...allowedFrameAncestors].join(' ')
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -45,7 +46,7 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-  `frame-ancestors 'self' ${studioOrigin}`,
+  `frame-ancestors ${frameAncestorsDirective}`,
   ...(isDev ? [] : ['upgrade-insecure-requests']),
 ].join('; ')
 
