@@ -28,10 +28,21 @@ function requireEnv(value: string | undefined, name: string) {
 const projectId = requireEnv(process.env.NEXT_PUBLIC_SANITY_PROJECT_ID, 'NEXT_PUBLIC_SANITY_PROJECT_ID')
 const dataset = requireEnv(process.env.NEXT_PUBLIC_SANITY_DATASET, 'NEXT_PUBLIC_SANITY_DATASET')
 
-const allowedFrameAncestors = [
-  'http://localhost:3333',
-  `https://${projectId}.sanity.studio`,
-]
+const configuredFrameAncestors = (
+  process.env.ALLOWED_FRAME_ANCESTORS ?? process.env.NEXT_PUBLIC_ALLOWED_FRAME_ANCESTORS ?? ''
+)
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+const allowedFrameAncestors = Array.from(
+  new Set([
+    'http://localhost:3333',
+    'https://www.sanity.studio',
+    'https://*.sanity.studio',
+    `https://${projectId}.sanity.studio`,
+    ...configuredFrameAncestors,
+  ]),
+)
 const frameAncestorsDirective = ["'self'", ...allowedFrameAncestors].join(' ')
 
 const contentSecurityPolicy = [
