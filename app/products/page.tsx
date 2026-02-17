@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import {
   attributeValueToLabel,
+  attributeValueToTokens,
   filterVariantsBySelections,
   getListingData,
   parseMultiParam,
@@ -133,6 +134,13 @@ function swatchColor(label: string) {
   return '#cfd2d8'
 }
 
+type FilterOption = {
+  _id: string
+  label: string
+  value: string
+  definitionRef: string
+}
+
 export default async function ProductsPage({
   searchParams,
 }: {
@@ -171,6 +179,7 @@ export default async function ProductsPage({
     string,
     { _id: string; label: string; value: string; definitionRef: string }[]
   >()
+  const derivedFilterOptionsByDefinitionKey = new Map<string, FilterOption[]>()
 
   ;(listingData.config.filterDefinitions || [])
     .filter((definition) => definition.valueType === 'number')
@@ -213,6 +222,56 @@ export default async function ProductsPage({
       })
 
       numericFilterOptionsByDefinitionKey.set(definition.key, options)
+    })
+
+  ;(listingData.config.filterDefinitions || [])
+    .filter((definition) => definition.valueType === 'text' || definition.valueType === 'boolean')
+    .forEach((definition) => {
+      const deduped = new Map<string, FilterOption>()
+
+      listingData.products.forEach((product) => {
+        product.variants.forEach((variant) => {
+          const attribute =
+            pickAttribute(variant.configSelections, definition.key) ||
+            pickAttribute(variant.specAttributes, definition.key)
+
+          if (!attribute) {
+            return
+          }
+
+          const tokens = attributeValueToTokens(attribute)
+          const label = attributeValueToLabel(attribute)
+          const rawTextValue = typeof attribute.textValue === 'string' ? attribute.textValue : undefined
+
+          tokens.forEach((token) => {
+            if (!token || deduped.has(token)) {
+              return
+            }
+
+            const fallbackLabel =
+              definition.valueType === 'boolean' ? (token === 'true' ? 'Yes' : 'No') : token
+
+            deduped.set(token, {
+              _id: `${definition._id}-${token}`,
+              label: label || rawTextValue || fallbackLabel,
+              value: rawTextValue || token,
+              definitionRef: definition._id,
+            })
+          })
+        })
+      })
+
+      const options = Array.from(deduped.values()).sort((a, b) => {
+        if (definition.valueType === 'boolean') {
+          if (valueToToken(a.value) === valueToToken(b.value)) {
+            return 0
+          }
+          return valueToToken(a.value) === 'true' ? -1 : 1
+        }
+        return a.label.localeCompare(b.label)
+      })
+
+      derivedFilterOptionsByDefinitionKey.set(definition.key, options)
     })
 
   const selectedFilters = (listingData.config.filterDefinitions || []).reduce<
@@ -315,7 +374,15 @@ export default async function ProductsPage({
             const options =
               definition.valueType === 'number'
                 ? numericFilterOptionsByDefinitionKey.get(definition.key) || []
-                : listingData.options.filter((option) => option.definitionRef === definition._id)
+                : (() => {
+                    const configuredOptions = listingData.options.filter(
+                      (option) => option.definitionRef === definition._id,
+                    )
+                    if (configuredOptions.length > 0) {
+                      return configuredOptions
+                    }
+                    return derivedFilterOptionsByDefinitionKey.get(definition.key) || []
+                  })()
             const selected = selectedFilters[definition.key] || []
             const singleSelect = definition.valueType === 'singleOption'
             const selectedLabels = options
