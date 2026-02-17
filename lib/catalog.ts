@@ -506,6 +506,7 @@ export function filterVariantsBySelections(
   query = '',
 ) {
   const skuQuery = valueToToken(query)
+  const numericRangePattern = /^(-?\d+(?:\.\d+)?)-(-?\d+(?:\.\d+)?)$/
 
   return variants.filter((variant) => {
     if (stockedOnly && !variant.isStocked) {
@@ -521,9 +522,25 @@ export function filterVariantsBySelections(
         return true
       }
 
-      const attribute = pickAttribute(variant.configSelections, key)
+      const attribute =
+        pickAttribute(variant.configSelections, key) || pickAttribute(variant.specAttributes, key)
       if (!attribute) {
         return false
+      }
+
+      if (
+        attribute.definition?.valueType === 'number' &&
+        selectedTokens.length === 1 &&
+        typeof attribute.numberValue === 'number'
+      ) {
+        const rangeMatch = selectedTokens[0].match(numericRangePattern)
+        if (rangeMatch) {
+          const min = Number(rangeMatch[1])
+          const max = Number(rangeMatch[2])
+          if (!Number.isNaN(min) && !Number.isNaN(max)) {
+            return attribute.numberValue >= min && attribute.numberValue <= max
+          }
+        }
       }
 
       const tokens = attributeValueToTokens(attribute)

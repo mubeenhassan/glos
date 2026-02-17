@@ -10,6 +10,7 @@ import {
   type ProductVariant,
 } from '@/lib/catalog'
 import {mediaImageUrl, sanityImageUrl, valueToToken} from '@/lib/sanity'
+import NumericRangeFilter from '@/components/NumericRangeFilter'
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -65,6 +66,49 @@ function toggleFilter(
 
   next.set('page', '1')
   return next.toString()
+}
+
+function formatNumericFilterLabel(value: number, unit?: string) {
+  const formatted = Number.isInteger(value) ? value.toString() : value.toFixed(2).replace(/\.?0+$/, '')
+  return unit ? `${formatted} ${unit}` : formatted
+}
+
+function formatNumericParamValue(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.?0+$/, '')
+}
+
+function parseNumericRangeParam(
+  rawValue: string | string[] | undefined,
+  minBound: number,
+  maxBound: number,
+) {
+  const value = toSingle(rawValue)
+  if (!value) {
+    return null
+  }
+
+  const match = value.match(/^(-?\d+(?:\.\d+)?)-(-?\d+(?:\.\d+)?)$/)
+  if (!match) {
+    return null
+  }
+
+  let min = Number(match[1])
+  let max = Number(match[2])
+
+  if (Number.isNaN(min) || Number.isNaN(max)) {
+    return null
+  }
+
+  if (min > max) {
+    ;[min, max] = [max, min]
+  }
+
+  const clampedMin = Math.max(minBound, Math.min(min, maxBound))
+  const clampedMax = Math.max(minBound, Math.min(max, maxBound))
+  return {
+    min: clampedMin,
+    max: clampedMax,
+  }
 }
 
 function getColumnValue(variant: ProductVariant, key: string) {
@@ -239,12 +283,84 @@ export default async function ConfiguratorPage({
 
   const urlParams = asSearchParamsObject(rawSearch)
 
-  const selectedFilters = Object.fromEntries(
-    config.filterDefinitions.map((definition) => [
-      definition.key,
-      parseMultiParam(rawSearch[definition.key]),
-    ]),
-  )
+  const numericFilterMetaByDefinitionKey = new Map<
+    string,
+    {
+      minBound: number
+      maxBound: number
+      selectedMin: number
+      selectedMax: number
+      step: number
+    }
+  >()
+
+  const numericFilterOptionsByDefinitionKey = new Map<
+    string,
+    { _id: string; label: string; value: string; definitionRef: string }[]
+  >()
+
+  config.filterDefinitions
+    .filter((definition) => definition.valueType === 'number')
+    .forEach((definition) => {
+      const uniqueValues = new Set<number>()
+
+      product.variants.forEach((variant) => {
+        const attribute =
+          pickAttribute(variant.configSelections, definition.key) ||
+          pickAttribute(variant.specAttributes, definition.key)
+
+        if (typeof attribute?.numberValue === 'number') {
+          uniqueValues.add(attribute.numberValue)
+        }
+      })
+
+      const sortedValues = Array.from(uniqueValues).sort((a, b) => a - b)
+      if (sortedValues.length > 0) {
+        const minBound = sortedValues[0]
+        const maxBound = sortedValues[sortedValues.length - 1]
+        const selectedRange = parseNumericRangeParam(rawSearch[definition.key], minBound, maxBound)
+
+        numericFilterMetaByDefinitionKey.set(definition.key, {
+          minBound,
+          maxBound,
+          selectedMin: selectedRange?.min ?? minBound,
+          selectedMax: selectedRange?.max ?? maxBound,
+          step: sortedValues.some((value) => !Number.isInteger(value)) ? 0.1 : 1,
+        })
+      }
+
+      const numericOptions = sortedValues.map((value) => {
+        const valueToken = String(value)
+        return {
+          _id: `${definition._id}-${valueToken}`,
+          label: formatNumericFilterLabel(value, definition.unit),
+          value: valueToken,
+          definitionRef: definition._id,
+        }
+      })
+
+      numericFilterOptionsByDefinitionKey.set(definition.key, numericOptions)
+    })
+
+  const selectedFilters = config.filterDefinitions.reduce<Record<string, string[]>>((acc, definition) => {
+    if (definition.valueType === 'number') {
+      const meta = numericFilterMetaByDefinitionKey.get(definition.key)
+      if (!meta) {
+        acc[definition.key] = []
+        return acc
+      }
+
+      const hasActiveRange = meta.selectedMin !== meta.minBound || meta.selectedMax !== meta.maxBound
+      acc[definition.key] = hasActiveRange
+        ? [`${formatNumericParamValue(meta.selectedMin)}-${formatNumericParamValue(meta.selectedMax)}`]
+        : []
+
+      return acc
+    }
+
+    acc[definition.key] = parseMultiParam(rawSearch[definition.key])
+    return acc
+  }, {})
 
   const stockedOnly = toSingle(rawSearch.stocked) === '1'
   const skuQuery = toSingle(rawSearch.q) || ''
@@ -448,45 +564,65 @@ export default async function ConfiguratorPage({
           </section>
 
           {config.filterDefinitions.map((definition) => {
-            const definitionOptions = optionsByDefinition.get(definition._id) ?? []
+            const numericMeta = numericFilterMetaByDefinitionKey.get(definition.key)
+            const definitionOptions =
+              definition.valueType === 'number'
+                ? numericFilterOptionsByDefinitionKey.get(definition.key) ?? []
+                : optionsByDefinition.get(definition._id) ?? []
             const selected = activeFilters[definition.key] || []
             const singleSelect = definition.valueType === 'singleOption'
 
             return (
               <section key={definition._id} className="cfg-filter">
                 <h5>{definition.title}</h5>
-                <div className="cfg-options">
-                  {definitionOptions.map((option) => {
-                    const token = valueToToken(option.value)
-                    const active = selected.includes(token)
-                    const paramsString = toggleFilter(urlParams, definition, token, singleSelect)
-                    const isDisabled = lockFiltersToSelectedSku && !active
+                {definition.valueType === 'number' && !lockFiltersToSelectedSku ? (
+                  numericMeta ? (
+                    <NumericRangeFilter
+                      paramKey={definition.key}
+                      minBound={numericMeta.minBound}
+                      maxBound={numericMeta.maxBound}
+                      selectedMin={numericMeta.selectedMin}
+                      selectedMax={numericMeta.selectedMax}
+                      step={numericMeta.step}
+                      unit={definition.unit}
+                    />
+                  ) : (
+                    <span className="meta">No numeric values configured</span>
+                  )
+                ) : (
+                  <div className="cfg-options">
+                    {definitionOptions.map((option) => {
+                      const token = valueToToken(option.value)
+                      const active = selected.includes(token)
+                      const paramsString = toggleFilter(urlParams, definition, token, singleSelect)
+                      const isDisabled = lockFiltersToSelectedSku && !active
 
-                    if (lockFiltersToSelectedSku) {
+                      if (lockFiltersToSelectedSku) {
+                        return (
+                          <span
+                            key={option._id}
+                            className={`cfg-option ${active ? 'active' : ''} ${
+                              isDisabled ? 'cfg-option-disabled' : 'cfg-option-locked'
+                            }`}
+                            aria-disabled={isDisabled}
+                          >
+                            {option.label}
+                          </span>
+                        )
+                      }
+
                       return (
-                        <span
+                        <Link
                           key={option._id}
-                          className={`cfg-option ${active ? 'active' : ''} ${
-                            isDisabled ? 'cfg-option-disabled' : 'cfg-option-locked'
-                          }`}
-                          aria-disabled={isDisabled}
+                          href={`/configurator/product/${product.slug}?${paramsString}`}
+                          className={`cfg-option ${active ? 'active' : ''}`}
                         >
                           {option.label}
-                        </span>
+                        </Link>
                       )
-                    }
-
-                    return (
-                      <Link
-                        key={option._id}
-                        href={`/configurator/product/${product.slug}?${paramsString}`}
-                        className={`cfg-option ${active ? 'active' : ''}`}
-                      >
-                        {option.label}
-                      </Link>
-                    )
-                  })}
-                </div>
+                    })}
+                  </div>
+                )}
               </section>
             )
           })}
@@ -816,6 +952,7 @@ export default async function ConfiguratorPage({
                     )
                   })}
                 </div>
+
               </div>
             </section>
           )}
