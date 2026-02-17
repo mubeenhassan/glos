@@ -90,7 +90,6 @@ export type ListingConfig = {
   }[]
   filterDefinitions?: AttributeDefinition[]
   cardAttributeDefinitions?: AttributeDefinition[]
-  enableCompare?: boolean
 }
 
 export type ProductDetail = {
@@ -174,7 +173,6 @@ const DEFAULT_LISTING_CONFIG: ListingConfig = {
   ],
   filterDefinitions: [],
   cardAttributeDefinitions: [],
-  enableCompare: true,
 }
 
 const DEFAULT_CONFIGURATOR_CONFIG: ConfiguratorConfig = {
@@ -193,8 +191,7 @@ const LISTING_QUERY = `{
     itemsPerPage,
     tabs,
     "filterDefinitions": filterDefinitions[]->{_id, key, title, valueType, uiControl, unit},
-    "cardAttributeDefinitions": cardAttributeDefinitions[]->{_id, key, title, valueType, uiControl, unit},
-    enableCompare
+    "cardAttributeDefinitions": cardAttributeDefinitions[]->{_id, key, title, valueType, uiControl, unit}
   },
   "options": *[_type == "attributeOption" && coalesce(isDisabled, false) != true] | order(order asc, label asc) {
     _id,
