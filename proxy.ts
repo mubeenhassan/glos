@@ -1,5 +1,5 @@
-import {NextResponse} from 'next/server'
-import type {NextRequest} from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 type RedirectRule = {
   source: string
@@ -40,6 +40,7 @@ const allowedFrameAncestors = Array.from(
     'https://www.sanity.studio',
     'https://*.sanity.studio',
     `https://${projectId}.sanity.studio`,
+    process.env.SANITY_STUDIO_URL,
     ...configuredFrameAncestors,
   ]),
 )
@@ -124,22 +125,22 @@ async function fetchRedirects() {
   }
 
   const query = '*[_type == "redirect" && enabled == true]{source, destination, permanent}'
-  const params = new URLSearchParams({query})
+  const params = new URLSearchParams({ query })
   const endpoint = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?${params.toString()}`
 
   const response = await fetch(endpoint, {
-    headers: readToken ? {Authorization: `Bearer ${readToken}`} : undefined,
+    headers: readToken ? { Authorization: `Bearer ${readToken}` } : undefined,
     cache: 'no-store',
   })
 
   if (!response.ok) {
-    redirectCache = {expiresAt: now + cacheTtlMs, items: []}
+    redirectCache = { expiresAt: now + cacheTtlMs, items: [] }
     return []
   }
 
-  const data = (await response.json()) as {result?: RedirectRule[]}
+  const data = (await response.json()) as { result?: RedirectRule[] }
   const items = (data.result ?? []).filter((item) => item.source && item.destination)
-  redirectCache = {expiresAt: now + cacheTtlMs, items}
+  redirectCache = { expiresAt: now + cacheTtlMs, items }
   return items
 }
 
@@ -147,7 +148,7 @@ export async function proxy(request: NextRequest) {
   const currentPath = normalizePath(request.nextUrl.pathname)
 
   if (hasSuspiciousPath(currentPath) || hasSuspiciousQuery(request.nextUrl.searchParams)) {
-    return withSecurityHeaders(new NextResponse('Bad Request', {status: 400}))
+    return withSecurityHeaders(new NextResponse('Bad Request', { status: 400 }))
   }
 
   if (isIgnoredPath(currentPath)) {
