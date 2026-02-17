@@ -111,6 +111,21 @@ function parseNumericRangeParam(
   }
 }
 
+function dedupeDefinitions(definitions: AttributeDefinition[]) {
+  const seenIds = new Set<string>()
+  const seenKeys = new Set<string>()
+
+  return definitions.filter((definition) => {
+    if (seenIds.has(definition._id) || seenKeys.has(definition.key)) {
+      return false
+    }
+
+    seenIds.add(definition._id)
+    seenKeys.add(definition.key)
+    return true
+  })
+}
+
 function getColumnValue(variant: ProductVariant, key: string) {
   if (key === 'sku') {
     return variant.sku
@@ -281,6 +296,10 @@ export default async function ConfiguratorPage({
     )
   }
 
+  const filterDefinitions = dedupeDefinitions(config.filterDefinitions)
+  const tableColumns = dedupeDefinitions(config.tableColumns)
+  const defaultVisibleColumns = dedupeDefinitions(config.defaultVisibleColumns)
+
   const urlParams = asSearchParamsObject(rawSearch)
 
   const numericFilterMetaByDefinitionKey = new Map<
@@ -299,7 +318,7 @@ export default async function ConfiguratorPage({
     { _id: string; label: string; value: string; definitionRef: string }[]
   >()
 
-  config.filterDefinitions
+  filterDefinitions
     .filter((definition) => definition.valueType === 'number')
     .forEach((definition) => {
       const uniqueValues = new Set<number>()
@@ -342,7 +361,7 @@ export default async function ConfiguratorPage({
       numericFilterOptionsByDefinitionKey.set(definition.key, numericOptions)
     })
 
-  const selectedFilters = config.filterDefinitions.reduce<Record<string, string[]>>((acc, definition) => {
+  const selectedFilters = filterDefinitions.reduce<Record<string, string[]>>((acc, definition) => {
     if (definition.valueType === 'number') {
       const meta = numericFilterMetaByDefinitionKey.get(definition.key)
       if (!meta) {
@@ -376,7 +395,7 @@ export default async function ConfiguratorPage({
         )
       : undefined) ?? undefined
 
-  const lockedFiltersFromSku = config.filterDefinitions.reduce<Record<string, string[]>>(
+  const lockedFiltersFromSku = filterDefinitions.reduce<Record<string, string[]>>(
     (acc, definition) => {
       const specValue = pickAttribute(selectedVariantBySku?.specAttributes, definition.key)
       const configValue = pickAttribute(selectedVariantBySku?.configSelections, definition.key)
@@ -419,8 +438,7 @@ export default async function ConfiguratorPage({
     optionsByDefinition.set(option.definitionRef, existing)
   })
 
-  const visibleColumns =
-    config.defaultVisibleColumns.length > 0 ? config.defaultVisibleColumns : config.tableColumns
+  const visibleColumns = defaultVisibleColumns.length > 0 ? defaultVisibleColumns : tableColumns
   const nonSkuColumns = visibleColumns.filter((column) => column.key !== 'sku')
 
   const selectedVariant =
@@ -563,7 +581,7 @@ export default async function ConfiguratorPage({
             )}
           </section>
 
-          {config.filterDefinitions.map((definition) => {
+          {filterDefinitions.map((definition) => {
             const numericMeta = numericFilterMetaByDefinitionKey.get(definition.key)
             const definitionOptions =
               definition.valueType === 'number'
@@ -657,14 +675,6 @@ export default async function ConfiguratorPage({
                     {featuredVariant?.isStocked ? featuredVariant.stockLabel || 'Standard' : 'Made to order'}
                   </p>
                   <p className="meta">This item is generally stocked. Check with your distributor.</p>
-                </div>
-                <div className="cfg-icon-actions">
-                  <button type="button" className="cfg-icon-btn">
-                    +
-                  </button>
-                  <button type="button" className="cfg-icon-btn">
-                    ♡
-                  </button>
                 </div>
               </div>
 

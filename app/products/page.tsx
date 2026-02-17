@@ -141,7 +141,17 @@ export default async function ProductsPage({
   const [rawSearch, listingData] = await Promise.all([searchParams, getListingData()])
 
   const urlParams = asSearchParamsObject(rawSearch)
-  const tab = toSingle(rawSearch.tab) || 'all'
+  const configuredTabs = (listingData.config.tabs || []).filter(
+    (tab): tab is NonNullable<typeof tab> => Boolean(tab?.key && tab?.label),
+  )
+  const listingTabs =
+    configuredTabs.length > 0
+      ? configuredTabs
+      : [{_key: 'all', key: 'all', label: 'All Products', mode: 'all' as const}]
+  const requestedTab = toSingle(rawSearch.tab)
+  const activeTabConfig = listingTabs.find((item) => item.key === requestedTab) || listingTabs[0]
+  const activeTabKey = activeTabConfig?.key || 'all'
+  const stockOnlyMode = activeTabConfig?.mode === 'inStock'
   const sort = toSingle(rawSearch.sort) || listingData.config.defaultSort || 'recommended'
   const page = Number(toSingle(rawSearch.page) || '1')
   const pageSize = listingData.config.itemsPerPage || 24
@@ -231,7 +241,7 @@ export default async function ProductsPage({
       const matchingVariants = filterVariantsBySelections(
         product.variants,
         selectedFilters,
-        tab === 'inStock',
+        stockOnlyMode,
       )
 
       if (matchingVariants.length === 0) {
@@ -274,8 +284,8 @@ export default async function ProductsPage({
   if (sort) {
     baseForReset.set('sort', sort)
   }
-  if (tab) {
-    baseForReset.set('tab', tab)
+  if (activeTabKey) {
+    baseForReset.set('tab', activeTabKey)
   }
 
   return (
@@ -285,26 +295,19 @@ export default async function ProductsPage({
           <h3>Filters</h3>
 
           <div className="chip-wrap" style={{marginBottom: '10px'}}>
-            <Link
-              href={`/products?${new URLSearchParams({
-                ...Object.fromEntries(urlParams.entries()),
-                tab: 'all',
-                page: '1',
-              }).toString()}`}
-              className={`chip ${tab === 'all' ? 'chip-active' : ''}`}
-            >
-              All Products
-            </Link>
-            <Link
-              href={`/products?${new URLSearchParams({
-                ...Object.fromEntries(urlParams.entries()),
-                tab: 'inStock',
-                page: '1',
-              }).toString()}`}
-              className={`chip ${tab === 'inStock' ? 'chip-active' : ''}`}
-            >
-              In Stock
-            </Link>
+            {listingTabs.map((tabItem) => (
+              <Link
+                key={tabItem._key || tabItem.key}
+                href={`/products?${new URLSearchParams({
+                  ...Object.fromEntries(urlParams.entries()),
+                  tab: tabItem.key,
+                  page: '1',
+                }).toString()}`}
+                className={`chip ${activeTabKey === tabItem.key ? 'chip-active' : ''}`}
+              >
+                {tabItem.label}
+              </Link>
+            ))}
           </div>
 
           {(listingData.config.filterDefinitions || []).map((definition) => {
@@ -530,37 +533,52 @@ export default async function ProductsPage({
               const sampleVariant = product.matchingVariants[0]
 
               return (
-                <Link key={product._id} href={`/products/${product.slug}`} className="product-card">
-                  <div className="product-visual">
-                    {imageUrl ? <img src={imageUrl} alt={product.name} /> : <div className="product-placeholder" />}
-                  </div>
+                <article key={product._id} className="product-card">
+                  <Link
+                    href={`/configurator/product/${product.slug}`}
+                    className="product-config-link"
+                    aria-label={`Open ${product.name} configurator`}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M10 3H3v7h7V3Zm11 0h-7v7h7V3ZM10 14H3v7h7v-7Zm11 3.5-2.2-.4-.8-1.9 1.3-1.8-1.4-1.4-1.8 1.3-1.9-.8-.4-2.2h-2l-.4 2.2-1.9.8-1.8-1.3-1.4 1.4 1.3 1.8-.8 1.9-2.2.4v2l2.2.4.8 1.9-1.3 1.8 1.4 1.4 1.8-1.3 1.9.8.4 2.2h2l.4-2.2 1.9-.8 1.8 1.3 1.4-1.4-1.3-1.8.8-1.9 2.2-.4v-2Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </Link>
 
-                  {(product.listingBadgeText || product.isNew) && (
-                    <span className="badge">{product.listingBadgeText || 'NEW'}</span>
-                  )}
+                  <Link href={`/products/${product.slug}`} className="product-card-main">
+                    <div className="product-visual">
+                      {imageUrl ? <img src={imageUrl} alt={product.name} /> : <div className="product-placeholder" />}
+                    </div>
 
-                  <h3 className="product-name">{product.name}</h3>
+                    {(product.listingBadgeText || product.isNew) && (
+                      <span className="badge">{product.listingBadgeText || 'NEW'}</span>
+                    )}
 
-                  <p className="product-meta">{product.family}</p>
+                    <h3 className="product-name">{product.name}</h3>
 
-                  <div className="chip-wrap">
-                    {(listingData.config.cardAttributeDefinitions || []).slice(0, 2).map((definition) => {
-                      const value =
-                        attributeValueToLabel(pickAttribute(sampleVariant.configSelections, definition.key)) ||
-                        attributeValueToLabel(pickAttribute(sampleVariant.specAttributes, definition.key))
+                    <p className="product-meta">{product.family}</p>
 
-                      if (!value) {
-                        return null
-                      }
+                    <div className="chip-wrap">
+                      {(listingData.config.cardAttributeDefinitions || []).slice(0, 2).map((definition) => {
+                        const value =
+                          attributeValueToLabel(pickAttribute(sampleVariant.configSelections, definition.key)) ||
+                          attributeValueToLabel(pickAttribute(sampleVariant.specAttributes, definition.key))
 
-                      return (
-                        <span key={definition._id} className="chip">
-                          {definition.title}: {value}
-                        </span>
-                      )
-                    })}
-                  </div>
-                </Link>
+                        if (!value) {
+                          return null
+                        }
+
+                        return (
+                          <span key={definition._id} className="chip">
+                            {definition.title}: {value}
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </Link>
+                </article>
               )
             })}
           </div>

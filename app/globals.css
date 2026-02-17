@@ -740,15 +740,55 @@ img {
   border-radius: var(--radius-md);
   padding: 10px;
   background: var(--surface);
-  display: grid;
-  gap: 8px;
+  position: relative;
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .product-card:hover,
-.product-card:focus-visible {
+.product-card:focus-within {
   border-color: #bac3d7;
   transform: translateY(-1px);
+}
+
+.product-card-main {
+  display: grid;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-config-link {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid #c9cfde;
+  background: rgba(255, 255, 255, 0.94);
+  color: #1f48da;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  z-index: 2;
+}
+
+.product-card:hover .product-config-link,
+.product-card:focus-within .product-config-link {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.product-config-link:hover,
+.product-config-link:focus-visible {
+  border-color: #aab9ef;
+}
+
+.product-config-link svg {
+  width: 16px;
+  height: 16px;
 }
 
 .product-visual {
@@ -1063,6 +1103,11 @@ img {
   background: transparent;
   border: 0;
   padding: 0;
+}
+
+.catalog-page .product-config-link {
+  top: 10px;
+  left: 10px;
 }
 
 .catalog-page .product-visual {
@@ -1496,22 +1541,6 @@ img {
   color: #109451;
   font-weight: 700;
   font-size: 0.9rem;
-}
-
-.cfg-icon-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.cfg-icon-btn {
-  width: 44px;
-  height: 44px;
-  border: 1px solid #ccced4;
-  background: #f6f7f9;
-  border-radius: 2px;
-  color: #1b43ff;
-  font-size: 1.3rem;
-  cursor: pointer;
 }
 
 .cfg-distributor {
