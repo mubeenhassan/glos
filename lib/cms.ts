@@ -10,43 +10,54 @@ export type CmsInternalLink = {
 export type CmsButton = {
   _key?: string
   text?: string
-  linkType?: 'internal' | 'external'
+  linkType?: 'internal' | 'path' | 'external'
   internalLink?: CmsInternalLink | null
+  internalPath?: string
   externalUrl?: string
   openInNewTab?: boolean
   variant?: 'primary' | 'secondary' | 'dark' | 'light' | 'outline'
 }
 
-export type CmsNavigationChild = {
-  _key?: string
-  label?: string
-  linkType?: 'internal' | 'external'
-  internalLink?: CmsInternalLink | null
-  externalUrl?: string
-  openInNewTab?: boolean
-}
-
 export type CmsNavigationItem = {
   _key?: string
   label?: string
-  linkType?: 'internal' | 'external'
+  linkType?: 'internal' | 'path' | 'external'
   internalLink?: CmsInternalLink | null
+  internalPath?: string
   externalUrl?: string
   openInNewTab?: boolean
-  children?: CmsNavigationChild[]
 }
 
 export type CmsImage = SanityImage & {
   alt?: string
 }
 
+export type CmsMediaItem = {
+  _type?: 'mediaItem'
+  type?: 'image' | 'video'
+  image?: CmsImage
+  externalImageUrl?: string
+  videoUrl?: string
+}
+
+export type CmsFooterLinkColumn = {
+  _key?: string
+  title?: string
+  titleLinkType?: 'none' | 'internal' | 'path' | 'external'
+  titleInternalLink?: CmsInternalLink | null
+  titlePath?: string
+  titleExternalUrl?: string
+  titleOpenInNewTab?: boolean
+  links?: CmsNavigationItem[]
+}
+
 export type CmsHeroBlock = {
   _key?: string
   _type: 'heroBlock'
-  eyebrow?: string
   title?: string
   description?: string
-  mainImage?: CmsImage
+  backgroundMedia?: CmsMediaItem
+  overlayOpacity?: number
   cta?: CmsButton[]
 }
 
@@ -90,8 +101,16 @@ export type SiteSettings = {
   logo?: CmsImage
   footerLogo?: CmsImage
   headerNavigation?: CmsNavigationItem[]
-  footerColumns?: CmsNavigationItem[]
-  footerText?: string
+  showHeaderSearch?: boolean
+  headerSearchUrl?: string
+  footerDescription?: string
+  footerLinkColumns?: CmsFooterLinkColumn[]
+  footerContactTitle?: string
+  footerContactAddress?: string
+  footerContactPhone?: string
+  footerContactEmail?: string
+  footerCopyright?: string
+  footerLegalLinks?: CmsNavigationItem[]
   socialLinks?: {
     _key?: string
     platform?: string
@@ -111,6 +130,7 @@ const BUTTON_QUERY_FIELDS = `
   _key,
   text,
   linkType,
+  internalPath,
   openInNewTab,
   variant,
   externalUrl,
@@ -125,24 +145,13 @@ const NAV_ITEM_QUERY_FIELDS = `
   _key,
   label,
   linkType,
+  internalPath,
   externalUrl,
   openInNewTab,
   "internalLink": internalLink->{
     _type,
     title,
     "slug": slug.current
-  },
-  "children": children[]{
-    _key,
-    label,
-    linkType,
-    externalUrl,
-    openInNewTab,
-    "internalLink": internalLink->{
-      _type,
-      title,
-      "slug": slug.current
-    }
   }
 `
 
@@ -154,10 +163,16 @@ const PAGE_QUERY = `*[_type == "page" && slug.current == $slug][0]{
     _type,
     _key,
     _type == "heroBlock" => {
-      eyebrow,
       title,
       description,
-      mainImage,
+      backgroundMedia{
+        _type,
+        type,
+        image,
+        externalImageUrl,
+        videoUrl
+      },
+      overlayOpacity,
       cta[]{${BUTTON_QUERY_FIELDS}}
     },
     _type == "contentImageCta" => {
@@ -182,8 +197,29 @@ const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0]{
   logo,
   footerLogo,
   "headerNavigation": headerNavigation[]{${NAV_ITEM_QUERY_FIELDS}},
-  "footerColumns": footerColumns[]{${NAV_ITEM_QUERY_FIELDS}},
-  footerText,
+  showHeaderSearch,
+  headerSearchUrl,
+  footerDescription,
+  "footerLinkColumns": footerLinkColumns[]{
+    _key,
+    title,
+    titleLinkType,
+    titlePath,
+    titleExternalUrl,
+    titleOpenInNewTab,
+    "titleInternalLink": titleInternalLink->{
+      _type,
+      title,
+      "slug": slug.current
+    },
+    "links": links[]{${NAV_ITEM_QUERY_FIELDS}}
+  },
+  footerContactTitle,
+  footerContactAddress,
+  footerContactPhone,
+  footerContactEmail,
+  footerCopyright,
+  "footerLegalLinks": footerLegalLinks[]{${NAV_ITEM_QUERY_FIELDS}},
   socialLinks[]{
     _key,
     platform,
@@ -240,6 +276,14 @@ export function resolveButtonHref(button: CmsButton | null | undefined): Resolve
     }
   }
 
+  if (button.linkType === 'path') {
+    return {
+      href: button.internalPath || null,
+      openInNewTab: false,
+      isExternal: false,
+    }
+  }
+
   if (button.linkType === 'external') {
     return {
       href: button.externalUrl || null,
@@ -252,11 +296,19 @@ export function resolveButtonHref(button: CmsButton | null | undefined): Resolve
 }
 
 export function resolveNavigationHref(
-  item: Pick<CmsNavigationItem, 'linkType' | 'internalLink' | 'externalUrl' | 'openInNewTab'>,
+  item: Pick<CmsNavigationItem, 'linkType' | 'internalLink' | 'internalPath' | 'externalUrl' | 'openInNewTab'>,
 ) {
   if (item.linkType === 'internal') {
     return {
       href: resolveInternalHref(item.internalLink),
+      openInNewTab: false,
+      isExternal: false,
+    }
+  }
+
+  if (item.linkType === 'path') {
+    return {
+      href: item.internalPath || null,
       openInNewTab: false,
       isExternal: false,
     }

@@ -40,28 +40,39 @@ function CmsButtonLink({button}: {button: CmsButton | undefined}) {
 }
 
 function HeroBlockSection({block}: {block: Extract<CmsContentBlock, {_type: 'heroBlock'}>}) {
-  const imageUrl = mediaImageUrl({image: block.mainImage}, 1500)
+  const backgroundImageUrl =
+    block.backgroundMedia?.type === 'image'
+      ? mediaImageUrl(block.backgroundMedia, 2400)
+      : null
+  const backgroundVideoUrl = block.backgroundMedia?.type === 'video' ? block.backgroundMedia.videoUrl : null
+  const overlayOpacity = typeof block.overlayOpacity === 'number' ? block.overlayOpacity / 100 : 0.45
 
   return (
-    <section className="hero-panel cms-hero">
+    <section className="hero-panel cms-hero-block">
+      {backgroundVideoUrl ? (
+        <div className="cms-hero-bg" aria-hidden>
+          <video autoPlay muted loop playsInline>
+            <source src={backgroundVideoUrl} />
+          </video>
+        </div>
+      ) : backgroundImageUrl ? (
+        <div className="cms-hero-bg" aria-hidden>
+          <img src={backgroundImageUrl} alt="" />
+        </div>
+      ) : null}
+      <div className="cms-hero-overlay" style={{opacity: overlayOpacity}} aria-hidden />
+
       <div className="cms-hero-content">
-        {block.eyebrow ? <p className="cms-eyebrow">{block.eyebrow}</p> : null}
         <h1>{block.title || 'Untitled section'}</h1>
         {block.description ? <p>{block.description}</p> : null}
         {block.cta && block.cta.length > 0 ? (
-          <div className="cta-row">
+          <div className="cta-row hero-cta-row">
             {block.cta.map((button, index) => (
               <CmsButtonLink key={button._key || `${button.text}-${index}`} button={button} />
             ))}
           </div>
         ) : null}
       </div>
-
-      {imageUrl ? (
-        <div className="cms-hero-media">
-          <img src={imageUrl} alt={block.mainImage?.alt || block.title || 'Hero image'} />
-        </div>
-      ) : null}
     </section>
   )
 }
@@ -111,6 +122,7 @@ function RenderBlock({block}: {block: CmsContentBlock}) {
 
 export function CmsPageView({page}: {page: CmsPage}) {
   const blocks = page.contentBlocks ?? []
+  const hasLeadingHero = blocks[0]?._type === 'heroBlock'
 
   if (blocks.length === 0) {
     return (
@@ -124,7 +136,7 @@ export function CmsPageView({page}: {page: CmsPage}) {
   }
 
   return (
-    <main className="page-wrap cms-page">
+    <main className={`page-wrap cms-page${hasLeadingHero ? ' has-leading-hero' : ''}`}>
       {blocks.map((block, index) => (
         <RenderBlock key={block._key || `${block._type}-${index}`} block={block} />
       ))}
