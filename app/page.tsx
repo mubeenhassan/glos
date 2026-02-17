@@ -1,27 +1,29 @@
 import Link from 'next/link'
+import {CmsPageView} from '@/components/CmsPageView'
+import {getPageBySlug} from '@/lib/cms'
 
-export default function HomePage() {
-  return (
-    <main className="page-wrap">
-      <section className="hero-panel">
-        <h1>Architectural Lighting Catalog</h1>
-        <p>
-          Browse products, open rich product pages, and configure SKU-level variants with dynamic
-          filters driven directly from your Sanity CMS structure.
-        </p>
+export default async function HomePage() {
+  const page = await getPageBySlug('home')
 
-        <div className="cta-row">
-          <Link className="btn btn-primary" href="/products">
-            Open Product Listing
-          </Link>
-          <Link className="btn" href="/products/inter-angled-linear-light">
-            Open Product Page
-          </Link>
-          <Link className="btn" href="/configurator/product/inter-angled-linear-light">
-            Open Configurator
-          </Link>
-        </div>
-      </section>
-    </main>
-  )
+  if (!page) {
+    return (
+      <main className="page-wrap">
+        <section className="hero-panel">
+          <h1>Home page is not published yet</h1>
+          <p>
+            Create a `page` document with slug `home` in Sanity Studio to control this page with
+            dynamic content blocks.
+          </p>
+          <div className="cta-row">
+            <Link className="btn btn-primary" href="/products">
+              Open Product Listing
+            </Link>
+          </div>
+        </section>
+      </main>
+    )
+  }
+
+  return <CmsPageView page={page} />
 }
+

@@ -47,7 +47,7 @@ export async function fetchSanity<T>(
     apiVersion,
     useCdn: perspective === 'published' && useCdn,
     perspective,
-    token: perspective === 'previewDrafts' ? readToken : undefined,
+    token: readToken,
     stega: {
       enabled: enableStega,
       studioUrl,
