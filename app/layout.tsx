@@ -44,7 +44,7 @@ export default async function RootLayout({
               <div className="preview-bar">
                 <div className="preview-bar-inner">
                   <span>Live editing is enabled (draft mode)</span>
-                  <Link href="/api/draft-mode/disable">Exit live editing</Link>
+                  <Link href="/api/draft-mode/disable?redirect=/">Exit live editing</Link>
                 </div>
               </div>
               <VisualEditingBridge />

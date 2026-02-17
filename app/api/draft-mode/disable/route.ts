@@ -9,7 +9,7 @@ function safeDecodeUri(value: string) {
   }
 }
 
-function resolveRedirectPath(rawPath: string | null, requestOrigin: string, fallback = '/products') {
+function resolveRedirectPath(rawPath: string | null, requestOrigin: string, fallback = '/') {
   if (!rawPath) return fallback
 
   const decoded = safeDecodeUri(rawPath).trim()

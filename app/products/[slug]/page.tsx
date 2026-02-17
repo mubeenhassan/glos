@@ -41,11 +41,14 @@ export default async function ProductDetailPage({
 
   const heroMedia = product.heroMedia?.[0]
   const heroImageUrl = mediaImageUrl(heroMedia, 1200)
-  const firstVariant = product.variants[0]
+  const detailVariant =
+    product.detailVariant && product.variants.some((variant) => variant._id === product.detailVariant?._id)
+      ? product.detailVariant
+      : product.variants[0]
 
   const mergedSpecs = [
     ...(product.productAttributes || []),
-    ...(firstVariant?.specAttributes || []).filter(
+    ...(detailVariant?.specAttributes || []).filter(
       (item) => !pickAttribute(product.productAttributes, item.definition?.key || ''),
     ),
   ]
@@ -54,7 +57,7 @@ export default async function ProductDetailPage({
 
   const resources = [
     ...(product.resources || []),
-    ...(firstVariant?.downloads || []),
+    ...(detailVariant?.downloads || []),
   ].filter((item, index, all) => all.findIndex((other) => other._id === item._id) === index)
 
   const hasModels = (product.availableModels || []).length > 0

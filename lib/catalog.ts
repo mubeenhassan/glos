@@ -22,6 +22,7 @@ export type AttributeOption = {
 export type AttributeValue = {
   definition?: AttributeDefinition
   numberValue?: number
+  numberTextValue?: string
   booleanValue?: boolean
   textValue?: string
   singleOptionValue?: {
@@ -98,8 +99,6 @@ export type ProductDetail = {
   slug: string
   shortDescription?: string
   heroDescription?: string
-  heroPrimaryCtaLabel?: string
-  heroPrimaryCtaLink?: string
   listingBadgeText?: string
   brand?: string
   category?: string
@@ -139,6 +138,7 @@ export type ProductDetail = {
     slug: string
     listingCardImage?: SanityImage
   }[]
+  detailVariant?: ProductVariant
   variants: ProductVariant[]
 }
 
@@ -247,6 +247,7 @@ function normalizeProductCard(product: ProductCard): ProductCard {
 function normalizeProductDetail(product: ProductDetail): ProductDetail {
   return {
     ...product,
+    detailVariant: product.detailVariant ? normalizeVariant(product.detailVariant) : undefined,
     variants: (product.variants ?? []).map(normalizeVariant),
     productAttributes: (product.productAttributes ?? []).map(normalizeAttributeValue),
   }
@@ -289,6 +290,7 @@ const LISTING_QUERY = `{
       configSelections[]{
         definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
         numberValue,
+        "numberTextValue": select(defined(numberValue) => string(numberValue), null),
         booleanValue,
         textValue,
         singleOptionValue->{_id, label, value},
@@ -297,6 +299,7 @@ const LISTING_QUERY = `{
       specAttributes[]{
         definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
         numberValue,
+        "numberTextValue": select(defined(numberValue) => string(numberValue), null),
         booleanValue,
         textValue,
         singleOptionValue->{_id, label, value},
@@ -312,8 +315,6 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
   "slug": slug.current,
   shortDescription,
   heroDescription,
-  heroPrimaryCtaLabel,
-  heroPrimaryCtaLink,
   listingBadgeText,
   "brand": brand->title,
   "category": category->title,
@@ -322,6 +323,7 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
   productAttributes[]{
     definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
     numberValue,
+    "numberTextValue": select(defined(numberValue) => string(numberValue), null),
     booleanValue,
     textValue,
     singleOptionValue->{_id, label, value},
@@ -365,6 +367,34 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
     "slug": slug.current,
     listingCardImage
   },
+  "detailVariant": detailVariant->{
+    _id,
+    sku,
+    status,
+    isStocked,
+    stockLabel,
+    tableSortOrder,
+    previewMedia[]{_key, type, image, externalImageUrl, videoUrl},
+    configSelections[]{
+      definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
+      numberValue,
+      "numberTextValue": select(defined(numberValue) => string(numberValue), null),
+      booleanValue,
+      textValue,
+      singleOptionValue->{_id, label, value},
+      multiOptionValues[]->{_id, label, value}
+    },
+    specAttributes[]{
+      definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
+      numberValue,
+      "numberTextValue": select(defined(numberValue) => string(numberValue), null),
+      booleanValue,
+      textValue,
+      singleOptionValue->{_id, label, value},
+      multiOptionValues[]->{_id, label, value}
+    },
+    downloads[]->{_id, title, type, externalUrl}
+  },
   "variants": *[_type == "productVariant" && references(^._id) && status == "active"] | order(coalesce(tableSortOrder, 9999) asc, sku asc) {
     _id,
     sku,
@@ -376,6 +406,7 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
     configSelections[]{
       definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
       numberValue,
+      "numberTextValue": select(defined(numberValue) => string(numberValue), null),
       booleanValue,
       textValue,
       singleOptionValue->{_id, label, value},
@@ -384,6 +415,7 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
     specAttributes[]{
       definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
       numberValue,
+      "numberTextValue": select(defined(numberValue) => string(numberValue), null),
       booleanValue,
       textValue,
       singleOptionValue->{_id, label, value},
@@ -423,6 +455,7 @@ const CONFIGURATOR_QUERY = `{
       configSelections[]{
         definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
         numberValue,
+        "numberTextValue": select(defined(numberValue) => string(numberValue), null),
         booleanValue,
         textValue,
         singleOptionValue->{_id, label, value},
@@ -431,6 +464,7 @@ const CONFIGURATOR_QUERY = `{
       specAttributes[]{
         definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
         numberValue,
+        "numberTextValue": select(defined(numberValue) => string(numberValue), null),
         booleanValue,
         textValue,
         singleOptionValue->{_id, label, value},
@@ -533,7 +567,7 @@ export function attributeValueToLabel(attribute: AttributeValue | undefined) {
 
   if (typeof attribute.numberValue === 'number') {
     const unit = attribute.definition?.unit ? ` ${attribute.definition.unit}` : ''
-    return `${attribute.numberValue}${unit}`
+    return `${attribute.numberTextValue ?? String(attribute.numberValue)}${unit}`
   }
 
   if (typeof attribute.booleanValue === 'boolean') {

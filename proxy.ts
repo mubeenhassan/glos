@@ -52,7 +52,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io",
+  "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://picsum.photos https://*.picsum.photos",
   "media-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://ssl.gstatic.com",
   `connect-src 'self' https://*.sanity.io https://cdn.sanity.io${isDev ? ' ws: wss:' : ''}`,
   "frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
