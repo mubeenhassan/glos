@@ -46,9 +46,13 @@ function HeroBlockSection({block}: {block: Extract<CmsContentBlock, {_type: 'her
       : null
   const backgroundVideoUrl = block.backgroundMedia?.type === 'video' ? block.backgroundMedia.videoUrl : null
   const overlayOpacity = typeof block.overlayOpacity === 'number' ? block.overlayOpacity / 100 : 0.45
+  const contentAlignment =
+    block.contentAlignment === 'center' || block.contentAlignment === 'right'
+      ? block.contentAlignment
+      : 'left'
 
   return (
-    <section className="hero-panel cms-hero-block">
+    <section className={`hero-panel cms-hero-block cms-hero-align-${contentAlignment}`}>
       {backgroundVideoUrl ? (
         <div className="cms-hero-bg" aria-hidden>
           <video autoPlay muted loop playsInline>

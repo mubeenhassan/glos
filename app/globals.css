@@ -382,6 +382,20 @@ img {
   z-index: 2;
   min-width: 0;
   max-width: min(980px, 92vw);
+  margin-right: auto;
+  text-align: left;
+}
+
+.cms-hero-block.cms-hero-align-center .cms-hero-content {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.cms-hero-block.cms-hero-align-right .cms-hero-content {
+  margin-left: auto;
+  margin-right: 0;
+  text-align: right;
 }
 
 .cms-hero-content h1 {
@@ -402,6 +416,14 @@ img {
 
 .hero-cta-row {
   margin-top: clamp(28px, 3vw, 42px);
+}
+
+.cms-hero-block.cms-hero-align-center .hero-cta-row {
+  justify-content: center;
+}
+
+.cms-hero-block.cms-hero-align-right .hero-cta-row {
+  justify-content: flex-end;
 }
 
 .hero-cta-row .btn {

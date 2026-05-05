@@ -56,6 +56,7 @@ export type CmsHeroBlock = {
   _type: 'heroBlock'
   title?: string
   description?: string
+  contentAlignment?: 'left' | 'center' | 'right'
   backgroundMedia?: CmsMediaItem
   overlayOpacity?: number
   cta?: CmsButton[]
@@ -165,6 +166,7 @@ const PAGE_QUERY = `*[_type == "page" && slug.current == $slug][0]{
     _type == "heroBlock" => {
       title,
       description,
+      contentAlignment,
       backgroundMedia{
         _type,
         type,
