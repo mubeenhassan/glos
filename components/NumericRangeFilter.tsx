@@ -1,6 +1,6 @@
 'use client'
 
-import {useEffect, useMemo, useState} from 'react'
+import {useMemo, useState} from 'react'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 
 type NumericRangeFilterProps = {
@@ -35,11 +35,6 @@ export default function NumericRangeFilter({
   const searchParams = useSearchParams()
   const [minValue, setMinValue] = useState(selectedMin)
   const [maxValue, setMaxValue] = useState(selectedMax)
-
-  useEffect(() => {
-    setMinValue(selectedMin)
-    setMaxValue(selectedMax)
-  }, [selectedMin, selectedMax])
 
   const progress = useMemo(() => {
     const span = Math.max(maxBound - minBound, step)
@@ -124,4 +119,3 @@ export default function NumericRangeFilter({
     </div>
   )
 }
-

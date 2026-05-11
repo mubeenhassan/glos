@@ -412,6 +412,7 @@ export default async function ProductsPage({
                 {definition.valueType === 'number' && control === 'range' ? (
                   numericMeta ? (
                     <NumericRangeFilter
+                      key={`${definition.key}-${numericMeta.selectedMin}-${numericMeta.selectedMax}`}
                       paramKey={definition.key}
                       minBound={numericMeta.minBound}
                       maxBound={numericMeta.maxBound}

@@ -3,6 +3,8 @@ import {draftMode} from 'next/headers'
 import {Manrope, Sora} from 'next/font/google'
 import Link from 'next/link'
 import './globals.css'
+
+
 import VisualEditingBridge from './visual-editing'
 import HeaderAutoHide from '@/components/layout/HeaderAutoHide'
 import SiteFooter from '@/components/layout/SiteFooter'
