@@ -27,9 +27,5 @@ export default function NavigationLink({item, className}: NavigationLinkProps) {
     )
   }
 
-  return (
-    <Link className={className} href={resolved.href}>
-      {label}
-    </Link>
-  )
+  return <Link className={className} href={resolved.href}>{label}</Link>
 }

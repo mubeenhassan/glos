@@ -596,6 +596,7 @@ export default async function ConfiguratorPage({
                 {definition.valueType === 'number' && !lockFiltersToSelectedSku ? (
                   numericMeta ? (
                     <NumericRangeFilter
+                      key={`${definition.key}-${numericMeta.selectedMin}-${numericMeta.selectedMax}`}
                       paramKey={definition.key}
                       minBound={numericMeta.minBound}
                       maxBound={numericMeta.maxBound}

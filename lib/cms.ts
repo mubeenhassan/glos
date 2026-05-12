@@ -72,7 +72,141 @@ export type CmsContentImageCtaBlock = {
   cta?: CmsButton[]
 }
 
-export type CmsContentBlock = CmsHeroBlock | CmsContentImageCtaBlock
+export type CmsImageGalleryBlock = {
+  _key?: string
+  _type: 'imageGalleryBlock'
+  title?: string
+  images?: CmsImage[]
+}
+
+export type CmsProductSpotlightItem = {
+  _key?: string
+  hotspotX?: number
+  hotspotY?: number
+  imageOverride?: CmsImage
+  product?: {
+    _id?: string
+    name?: string
+    slug?: string
+    shortDescription?: string
+    heroDescription?: string
+    listingBadgeText?: string
+    category?: string
+    listingCardImage?: CmsImage
+    heroImage?: CmsImage
+    heroMedia?: CmsMediaItem
+  } | null
+}
+
+export type CmsProductSpotlightBlock = {
+  _key?: string
+  _type: 'productSpotlightBlock'
+  title?: string
+  items?: CmsProductSpotlightItem[]
+}
+
+export type CmsImageCollageCtaBlock = {
+  _key?: string
+  _type: 'imageCollageCtaBlock'
+  title?: string
+  eyebrow?: string
+  description?: string
+  mainImage?: CmsImage
+  topImage?: CmsImage
+  bottomImage?: CmsImage
+  cta?: CmsButton[]
+}
+
+export type CmsPinnedProductShowcaseBlock = {
+  _key?: string
+  _type: 'pinnedProductShowcaseBlock'
+  title?: string
+  detailTitle?: string
+  description?: string
+  backgroundImage?: CmsImage
+  productImageOverride?: CmsImage
+  specItems?: {
+    _key?: string
+    label?: string
+    color?: string
+  }[]
+  downloadLinks?: {
+    _key?: string
+    label?: string
+    url?: string
+  }[]
+  cta?: CmsButton[]
+  product?: {
+    _id?: string
+    name?: string
+    slug?: string
+    shortDescription?: string
+    heroDescription?: string
+    listingCardImage?: CmsImage
+    heroImage?: CmsImage
+    heroMedia?: CmsMediaItem
+    productAttributes?: {
+      definition?: {
+        title?: string
+        unit?: string
+      }
+      numberValue?: number
+      numberTextValue?: string
+      booleanValue?: boolean
+      textValue?: string
+      singleOptionValue?: {
+        label?: string
+        value?: string
+      }
+      multiOptionValues?: {
+        label?: string
+        value?: string
+      }[]
+    }[]
+    resources?: {
+      _id?: string
+      title?: string
+      type?: string
+      url?: string
+    }[]
+  } | null
+}
+
+export type CmsResourcesLearningBlock = {
+  _key?: string
+  _type: 'resourcesLearningBlock'
+  title?: string
+  intro?: string
+  description?: string
+  cta?: CmsButton[]
+}
+
+export type CmsFeaturedProjectsBlock = {
+  _key?: string
+  _type: 'featuredProjectsBlock'
+  title?: string
+  projects?: {
+    _id?: string
+    title?: string
+    slug?: string
+    description?: string
+    location?: string
+    projectType?: string
+    completionYear?: number
+    coverImage?: CmsImage
+  }[]
+  cta?: CmsButton[]
+}
+
+export type CmsContentBlock =
+  | CmsHeroBlock
+  | CmsContentImageCtaBlock
+  | CmsImageGalleryBlock
+  | CmsProductSpotlightBlock
+  | CmsImageCollageCtaBlock
+  | CmsPinnedProductShowcaseBlock
+  | CmsResourcesLearningBlock
+  | CmsFeaturedProjectsBlock
 
 export type CmsSeo = {
   metaTitle?: string
@@ -182,6 +316,113 @@ const PAGE_QUERY = `*[_type == "page" && slug.current == $slug][0]{
       description,
       imagePosition,
       mainImage,
+      cta[]{${BUTTON_QUERY_FIELDS}}
+    },
+    _type == "imageGalleryBlock" => {
+      title,
+      images
+    },
+    _type == "productSpotlightBlock" => {
+      title,
+      items[]{
+        _key,
+        hotspotX,
+        hotspotY,
+        imageOverride,
+        "product": product->{
+          _id,
+          name,
+          "slug": slug.current,
+          shortDescription,
+          heroDescription,
+          listingBadgeText,
+          "category": category->title,
+          listingCardImage,
+          "heroImage": heroMedia[type == "image"][0].image,
+          "heroMedia": heroMedia[type == "image"][0]{
+            _type,
+            type,
+            image,
+            externalImageUrl
+          }
+        }
+      }
+    },
+    _type == "imageCollageCtaBlock" => {
+      title,
+      eyebrow,
+      description,
+      mainImage,
+      topImage,
+      bottomImage,
+      cta[]{${BUTTON_QUERY_FIELDS}}
+    },
+    _type == "pinnedProductShowcaseBlock" => {
+      title,
+      detailTitle,
+      description,
+      backgroundImage,
+      productImageOverride,
+      specItems[]{
+        _key,
+        label,
+        color
+      },
+      downloadLinks[]{
+        _key,
+        label,
+        url
+      },
+      cta[]{${BUTTON_QUERY_FIELDS}},
+      "product": product->{
+        _id,
+        name,
+        "slug": slug.current,
+        shortDescription,
+        heroDescription,
+        listingCardImage,
+        "heroImage": heroMedia[type == "image"][0].image,
+        "heroMedia": heroMedia[type == "image"][0]{
+          _type,
+          type,
+          image,
+          externalImageUrl
+        },
+        productAttributes[]{
+          definition->{title, unit},
+          numberValue,
+          "numberTextValue": select(defined(numberValue) => string(numberValue), null),
+          booleanValue,
+          textValue,
+          singleOptionValue->{label, value},
+          multiOptionValues[]->{label, value}
+        },
+        "resources": resources[]->{
+          _id,
+          title,
+          type,
+          "url": coalesce(externalUrl, file.asset->url)
+        }
+      }
+    },
+    _type == "resourcesLearningBlock" => {
+      title,
+      intro,
+      description,
+      cta[]{${BUTTON_QUERY_FIELDS}}
+    },
+    _type == "featuredProjectsBlock" => {
+      title,
+      "projects": projects[]->{
+        _id,
+        title,
+        "slug": slug.current,
+        description,
+        location,
+        projectType,
+        completionYear,
+        coverImage
+      },
       cta[]{${BUTTON_QUERY_FIELDS}}
     }
   },
