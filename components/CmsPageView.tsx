@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import {stegaClean} from '@sanity/client/stega'
+import {createDataAttribute} from '@sanity/visual-editing/create-data-attribute'
 import {mediaImageUrl, sanityImageUrl} from '@/lib/sanity'
 import {resolveButtonHref, type CmsButton, type CmsContentBlock, type CmsPage} from '@/lib/cms'
 import PinnedProductShowcase from '@/components/PinnedProductShowcase'
@@ -165,10 +167,11 @@ const cmsPageClassName = 'flex flex-col w-full gap-8 bg-white md:gap-12 lg:gap-2
 
 const leadingHeroPageClassName = 'pt-0 md:pt-4 overflow-hidden'
 
-function HeroSplitTitle({title}: {title: string}) {
-  const segments = title.split(/(\s+)/)
+function HeroSplitTitle({title, dataSanity}: {title: string; dataSanity?: string}) {
+  const cleanTitle = stegaClean(title)
+  const segments = cleanTitle.split(/(\s+)/)
   return (
-    <h1 className={heroTitleClassName} aria-label={title}>
+    <h1 className={heroTitleClassName} aria-label={cleanTitle} data-sanity={dataSanity}>
       {segments.map((seg, i) =>
         /^\s+$/.test(seg) ? (
           seg
@@ -182,10 +185,11 @@ function HeroSplitTitle({title}: {title: string}) {
   )
 }
 
-function CollageSplitTitle({title}: {title: string}) {
-  const segments = title.split(/(\s+)/)
+function CollageSplitTitle({title, dataSanity}: {title: string; dataSanity?: string}) {
+  const cleanTitle = stegaClean(title)
+  const segments = cleanTitle.split(/(\s+)/)
   return (
-    <h2 className={collageTitleClassName} aria-label={title}>
+    <h2 className={collageTitleClassName} aria-label={cleanTitle} data-sanity={dataSanity}>
       {segments.map((seg, i) =>
         /^\s+$/.test(seg) ? (
           seg
@@ -199,7 +203,7 @@ function CollageSplitTitle({title}: {title: string}) {
   )
 }
 
-function HeroBlockSection({block}: {block: Extract<CmsContentBlock, {_type: 'heroBlock'}>}) {
+function HeroBlockSection({block, pageId}: {block: Extract<CmsContentBlock, {_type: 'heroBlock'}>; pageId?: string}) {
   const backgroundImageUrl =
     block.backgroundMedia?.type === 'image'
       ? mediaImageUrl(block.backgroundMedia, 2400)
@@ -245,7 +249,10 @@ function HeroBlockSection({block}: {block: Extract<CmsContentBlock, {_type: 'her
 
       <div className={heroContentClassName}>
         <div className={heroTitleColumnClassName}>
-          <HeroSplitTitle title={block.title || 'Untitled section'}  />
+          <HeroSplitTitle
+            title={block.title || 'Untitled section'}
+            dataSanity={pageId && block._key ? createDataAttribute({id: pageId, type: 'page', path: `contentBlocks[_key=="${block._key}"].title`}).toString() : undefined}
+          />
         </div>
 
         {block.description || (block.cta && block.cta.length > 0) ? (
@@ -300,10 +307,11 @@ function ContentImageCtaSection({block}: {block: Extract<CmsContentBlock, {_type
   )
 }
 
-function GallerySplitTitle({title, className}: {title: string; className?: string}) {
-  const segments = title.split(/(\s+)/)
+function GallerySplitTitle({title, className, dataSanity}: {title: string; className?: string; dataSanity?: string}) {
+  const cleanTitle = stegaClean(title)
+  const segments = cleanTitle.split(/(\s+)/)
   return (
-    <h2 className={className} aria-label={title}>
+    <h2 className={className} aria-label={cleanTitle} data-sanity={dataSanity}>
       {segments.map((seg, i) =>
         /^\s+$/.test(seg) ? (
           seg
@@ -317,7 +325,7 @@ function GallerySplitTitle({title, className}: {title: string; className?: strin
   )
 }
 
-function ImageGallerySection({block}: {block: Extract<CmsContentBlock, {_type: 'imageGalleryBlock'}>}) {
+function ImageGallerySection({block, pageId}: {block: Extract<CmsContentBlock, {_type: 'imageGalleryBlock'}>; pageId?: string}) {
   const images = (block.images || [])
     .map((image) => ({
       key: image.asset?._ref,
@@ -336,6 +344,7 @@ function ImageGallerySection({block}: {block: Extract<CmsContentBlock, {_type: '
       <GallerySplitTitle
         title={block.title || 'Transforming the Way Spaces Come Alive'}
         className={galleryHeadingClassName}
+        dataSanity={pageId && block._key ? createDataAttribute({id: pageId, type: 'page', path: `contentBlocks[_key=="${block._key}"].title`}).toString() : undefined}
       />
       <div className={galleryGridClassName}>
         {images.map((image, index) => (
@@ -409,8 +418,10 @@ function ProductSpotlightSection({
 
 function ImageCollageCtaSection({
   block,
+  pageId,
 }: {
   block: Extract<CmsContentBlock, {_type: 'imageCollageCtaBlock'}>
+  pageId?: string
 }) {
   const mainImageUrl = sanityImageUrl(block.mainImage, 1200)
   const topImageUrl = sanityImageUrl(block.topImage, 760)
@@ -435,7 +446,10 @@ function ImageCollageCtaSection({
       </div>
 
       <div className={collageCopyClassName}>
-        <CollageSplitTitle title={block.title || 'What We Do'} />
+        <CollageSplitTitle
+          title={block.title || 'What We Do'}
+          dataSanity={pageId && block._key ? createDataAttribute({id: pageId, type: 'page', path: `contentBlocks[_key=="${block._key}"].title`}).toString() : undefined}
+        />
         {block.eyebrow ? <p className={cx(collageEyebrowClassName, 'js-collage-copy-item')}>{block.eyebrow}</p> : null}
         {block.description ? <p className={cx(collageDescriptionClassName, 'js-collage-copy-item')}>{block.description}</p> : null}
         <div className="js-collage-copy-item">
@@ -654,9 +668,9 @@ function FeaturedProjectsSection({
   )
 }
 
-function RenderBlock({block}: {block: CmsContentBlock}) {
+function RenderBlock({block, pageId}: {block: CmsContentBlock; pageId?: string}) {
   if (block._type === 'heroBlock') {
-    return <HeroBlockSection block={block} />
+    return <HeroBlockSection block={block} pageId={pageId} />
   }
 
   if (block._type === 'contentImageCta') {
@@ -664,7 +678,7 @@ function RenderBlock({block}: {block: CmsContentBlock}) {
   }
 
   if (block._type === 'imageGalleryBlock') {
-    return <ImageGallerySection block={block} />
+    return <ImageGallerySection block={block} pageId={pageId} />
   }
 
   if (block._type === 'productSpotlightBlock') {
@@ -672,7 +686,7 @@ function RenderBlock({block}: {block: CmsContentBlock}) {
   }
 
   if (block._type === 'imageCollageCtaBlock') {
-    return <ImageCollageCtaSection block={block} />
+    return <ImageCollageCtaSection block={block} pageId={pageId} />
   }
 
   if (block._type === 'pinnedProductShowcaseBlock') {
@@ -716,7 +730,7 @@ export function CmsPageView({page}: {page: CmsPage}) {
       {hasImageCollage ? <ImageCollageAnimations /> : null}
       {hasResourcesOrProjects ? <ResourcesProjectsAnimations /> : null}
       {blocks.map((block, index) => (
-        <RenderBlock key={block._key || `${block._type}-${index}`} block={block} />
+        <RenderBlock key={block._key || `${block._type}-${index}`} block={block} pageId={page._id} />
       ))}
     </main>
   )
