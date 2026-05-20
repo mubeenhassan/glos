@@ -37,10 +37,10 @@ const slideClassName =
   "js-featured-slide w-[var(--featured-card-width)] min-w-[var(--featured-card-width)] shrink-0 snap-start";
 
 const cardClassName =
-  "group relative block h-full min-h-[420px] min-w-0 overflow-hidden rounded-lg bg-[#eceef2] md:min-h-[520px] lg:min-h-[clamp(440px,45vw,760px)]";
+  "group relative block h-full min-h-[400px] min-w-0 overflow-hidden rounded-lg bg-[#eceef2] md:min-h-[520px] lg:min-h-[clamp(440px,45vw,600px)]";
 
 const cardImageClassName =
-  "js-featured-image h-full w-full object-cover transition-transform duration-500 group-hover:scale-105";
+  "js-featured-image h-full max-h-[400px] lg:max-h-[600px] w-full object-cover transition-transform duration-500 group-hover:scale-105";
 
 const projectPlaceholderClassName =
   "grid h-full min-h-[inherit] w-full place-items-center bg-gradient-to-br from-[#f8f9fb] to-[#e8ebf2] p-7 text-center text-[#626a78]";
@@ -58,7 +58,7 @@ const projectDescriptionClassName =
   "m-0 text-sm leading-6 text-white/85 md:text-base";
 
 const navButtonBaseClassName =
-  "js-featured-control absolute top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-black text-xl text-[#fff] shadow-[0_14px_34px_rgba(16,24,40,0.16)] transition hover:-translate-y-[calc(50%+1px)] hover:text-[var(--color-brand-orange)] disabled:pointer-events-none disabled:bg-black/70 disabled:cursor-default cursor-pointer md:h-14 md:w-14";
+  "js-featured-control absolute w-12 h-12 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-[#111827] text-xl text-[#FFFFFF] shadow-[0_14px_34px_rgba(16,24,40,0.16)] transition hover:-translate-y-[calc(50%+1px)] hover:text-[var(--color-brand-orange)] disabled:pointer-events-none disabled:bg-black/70 disabled:cursor-default cursor-pointer md:h-14 md:w-14";
 
 type SliderMetrics = {
   step: number;
@@ -248,7 +248,7 @@ export default function FeaturedProjectsSlider({
       {canSlide ? (
         <>
           <button
-            className={`${navButtonBaseClassName} -left-3 md:-left-8`}
+            className={`${navButtonBaseClassName} -left-3 md:-left-7`}
             type="button"
             aria-label="Previous project"
             disabled={activeIndex === 0}
@@ -257,7 +257,7 @@ export default function FeaturedProjectsSlider({
             <FiArrowLeft aria-hidden />
           </button>
           <button
-            className={`${navButtonBaseClassName} -right-3 md:-right-8`}
+            className={`${navButtonBaseClassName} -right-3 md:-right-7`}
             type="button"
             aria-label="Next project"
             disabled={activeIndex === metrics.maxIndex}

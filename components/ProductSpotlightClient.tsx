@@ -26,7 +26,7 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 const headingClassName =
-  'relative z-[8] m-0 text-center font-[600] text-[26px] leading-tight tracking-normal text-[#121827] md:text-5xl md:leading-none lg:text-6xl'
+  'relative z-[8] m-0 text-center font-[500] md:font-[600] text-[20px] leading-tight tracking-normal text-[#121827] md:text-5xl md:leading-none lg:text-[48px]'
 
 function ProductSplitTitle({title}: {title: string}) {
   const segments = title.split(/(\s+)/)
@@ -262,10 +262,10 @@ export default function ProductSpotlightClient({
               >
                 <button
                   className={cx(
-                    'product-hotspot-btn absolute grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center rounded-full border-[7px] shadow-[0_12px_26px_rgba(0,0,0,0.18)] transition-all duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[rgba(255,95,46,0.34)] md:h-[58px] md:w-[58px] md:border-8',
+                    'product-hotspot-btn absolute grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center rounded-full border-[7px] shadow-[0_12px_26px_rgba(0,0,0,0.18)] transition-all duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[rgba(255,95,46,0.34)]  md:border-8',
                     isOpen
-                      ? 'border-[var(--color-brand-orange)] bg-white shadow-[0_0_0_5px_rgba(255,95,46,0.16),0_12px_26px_rgba(0,0,0,0.18)]'
-                      : 'border-[#050505] bg-[var(--color-brand-orange)]',
+                      ? ' bg-[var(--color-brand-orange)] shadow-[0_0_0_5px_rgba(255,95,46,0.16),0_12px_26px_rgba(0,0,0,0.18)]'
+                      : 'border-[#080707] bg-[var(--color-brand-orange)]',
                   )}
                   onClick={() => setOpenIndex((prev) => (prev === item.index ? null : item.index))}
                   aria-expanded={isOpen}
@@ -273,8 +273,8 @@ export default function ProductSpotlightClient({
                 >
                   <span
                     className={cx(
-                      'h-3 w-3 rounded-full transition-colors duration-200',
-                      isOpen ? 'bg-[var(--color-brand-orange)]' : 'bg-black/15',
+                      'h-4 w-4 rounded-full transition-colors duration-200',
+                      isOpen ? ' bg-[#080707]' : 'bg-transparent',
                     )}
                   />
                 </button>
@@ -298,7 +298,7 @@ export default function ProductSpotlightClient({
                   <p className={productPopoverTextClassName}>{item.description}</p>
                   <div className={productActionsClassName}>
                     <Link
-                      className="btn btn-primary !min-h-[50px] !rounded-lg !font-extrabold"
+                      className="btn btn-primary !min-h-[50px] rounded-[10px] md:!rounded-[8px] !font-semibold"
                       href={`/configurator/product/${item.slug}`}
                     >
                       Configure

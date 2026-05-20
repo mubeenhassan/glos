@@ -53,17 +53,17 @@ function CmsButtonLink({button, className}: {button: CmsButton | undefined; clas
 }
 
 const heroSectionClassName =
-  'cms-hero-block relative md:mx-auto md:mt-1 min-h-screen md:block flex items-center justify-center w-full md:w-[calc(100%_-_8px)] overflow-hidden md:rounded-2xl bg-[#111111] px-5 pb-11 pt-32 text-white md:min-h-[560px] md:px-6 md:pb-16 md:pt-40 lg:min-h-[640px] lg:px-12 lg:pt-44 xl:min-h-[clamp(610px,72vh,1040px)] lg:w-[min(100%_-_8px,1728px)] lg:px-[clamp(28px,4.2vw,74px)] lg:pb-[clamp(64px,9vh,122px)] lg:pt-[clamp(150px,16vh,218px)]'
+  'cms-hero-block relative md:mx-auto  min-h-screen md:block flex items-center justify-center w-full md:w-[calc(100%_-_0px)] overflow-hidden  bg-[#111111] px-5 pb-11 pt-32 text-white md:min-h-[560px] md:px-6 md:pb-16 md:pt-40 lg:min-h-[640px] lg:px-12 lg:pt-44 xl:min-h-[clamp(610px,92vh,1040px)]  lg:px-[clamp(28px,4.2vw,74px)] lg:pb-[clamp(64px,9vh,122px)] lg:pt-[clamp(150px,16vh,218px)]  '
 
 const heroBackgroundClassName = 'absolute inset-0'
 
 const heroBackgroundMediaClassName = 'h-full w-full object-cover'
 
 const heroOverlayClassName =
-  'absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.3)_45%,rgba(0,0,0,0.22)_100%),linear-gradient(180deg,rgba(0,0,0,0.26)_0%,rgba(0,0,0,0.08)_42%,rgba(0,0,0,0.42)_100%)]'
+  'absolute inset-0  bg-[#000000]/100'
 
 const heroContentBaseClassName =
-  'cms-hero-content relative z-[2] grid md:min-h-[344px] w-full min-w-0 grid-cols-1 items-center justify-center md:items-start gap-6 text-left md:min-h-[360px] lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.7fr)] lg:items-end lg:gap-11 xl:min-h-[calc(clamp(610px,72vh,940px)_-_clamp(150px,16vh,218px)_-_clamp(64px,9vh,122px))] xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.54fr)] xl:gap-[clamp(32px,7vw,136px)] '
+  'cms-hero-content relative max-w-[1280px] mx-auto z-[2] grid md:min-h-[344px] w-full min-w-0 grid-cols-1 items-center justify-center md:items-start gap-6 text-left md:min-h-[360px] lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.7fr)] lg:items-end lg:gap-11 xl:min-h-[calc(clamp(610px,72vh,940px)_-_clamp(150px,16vh,218px)_-_clamp(64px,9vh,122px))] xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.54fr)] xl:gap-[clamp(32px,7vw,136px)] 2xl:gap-[6vw] lg:mt-8 2xl:mt-[4vw]'
 
 const heroContentAlignmentClassNames = {
   left: '',
@@ -76,19 +76,19 @@ const heroTitleColumnBaseClassName = 'cms-hero-title-column self-start'
 const heroActionColumnBaseClassName = 'cms-hero-action-column self-end max-w-[620px]'
 
 const heroTitleClassName =
-  'm-0 text-[2rem] font-[600] leading-[1.08] md:text-left text-center tracking-normal text-white md:text-5xl lg:text-[5rem] '
+  'm-0 text-[24px] font-semibold leading-[1.08] md:text-left text-center tracking-normal text-white md:text-5xl lg:text-[4.5rem] '
 
 const heroWordOuterClassName =
   'hero-word-outer inline-block overflow-hidden pb-[0.08em] -mb-[0.08em] align-bottom md:pb-[0.1em] md:-mb-[0.1em]'
 
 const heroDescriptionClassName =
-  'md:mt-3.5 text-center md:text-left text-base leading-[1.32] text-white/[0.92] md:m-0 md:text-[clamp(0.96rem,2.2vw,1.16rem)] lg:text-[20px] lg:leading-[1.28]'
+  'md:mt-3.5 text-center md:text-left text-[16px] font-normal leading-[1.32] text-white/[0.92] md:m-0 md:text-[clamp(0.96rem,2.2vw,1.16rem)] lg:text-[20px] lg:leading-[1.28]'
 
 const heroCtaRowBaseClassName =
   'js-hero-cta-row mt-5 flex flex-wrap gap-3 md:mt-7 lg:mt-[clamp(24px,2.6vw,38px)]'
 
 const heroButtonClassName =
-  '!min-h-12 !w-full !min-w-full !rounded-[8px] !border-[var(--color-brand-orange)] !bg-[var(--color-brand-orange)] !px-3.5 !py-2.5 !text-[0.9rem] !font-extrabold !text-white hover:!border-[var(--color-brand-orange-hover)] hover:!bg-[var(--color-brand-orange-hover)] focus-visible:!border-[var(--color-brand-orange-hover)] focus-visible:!bg-[var(--color-brand-orange-hover)] md:!w-auto md:!min-w-[200px] md:!px-5 md:!py-3 md:!text-[0.94rem] lg:!min-h-[68px] lg:!min-w-[260px] lg:!rounded-lg lg:!px-7 lg:!py-3.5 lg:!text-[clamp(0.9rem,0.84vw,1rem)]'
+  '!min-h-12 !w-full !max-w-[200px]   !rounded-[10px] !border-[var(--color-brand-orange)] !bg-[var(--color-brand-orange)] !px-4.5 !py-3 !text-[0.9rem] !font-semibold !text-white hover:!border-[var(--color-brand-orange-hover)] hover:!bg-[var(--color-brand-orange-hover)] focus-visible:!border-[var(--color-brand-orange-hover)] focus-visible:!bg-[var(--color-brand-orange-hover)] md:!w-auto md:!min-w-[200px] md:!px-5 md:!py-3 md:!text-[0.94rem] lg:!min-h-[60px] lg:!min-w-[230px] !font-[500] !text-[1rem] tracking-[1.3]  lg:!rounded-[8px] lg:!px-5 lg:!py-3.5 lg:!text-[16px] '
 
 const sectionHeadingClassName =
   'm-0 font-[600] text-3xl font-semibold leading-tight tracking-[-0.02em] text-[#121827] md:text-4xl lg:text-5xl'
@@ -110,10 +110,10 @@ const placeholderClassName =
   'grid min-h-60 w-full place-items-center text-sm text-[var(--muted)]'
 
 const gallerySectionClassName =
-  'cms-gallery-section mx-auto grid w-[min(1380px,calc(100%_-_30px))] gap-7 pb-6 md:gap-12 lg:gap-16'
+  'cms-gallery-section mx-auto grid w-full gap-7 pb-6 md:gap-12 lg:gap-16'
 
 const galleryHeadingClassName =
-  'mx-auto m-0 w-full max-w-5xl overflow-hidden text-center text-3xl leading-tight tracking-normal text-[#121827] font-[600] md:text-5xl lg:text-6xl'
+  'mx-auto mt-10 w-full max-w-5xl overflow-hidden text-center text-[20px] leading-tight tracking-normal text-[#111827] px-4 font-[500] md:font-[600] md:text-5xl lg:text-[48px]'
 
 const galleryGridClassName =
   'cms-gallery-grid grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-3 lg:grid-cols-[1.12fr_0.78fr_0.78fr_1.12fr] lg:auto-rows-[clamp(170px,15.6vw,298px)]'
@@ -125,7 +125,7 @@ const productSectionClassName =
   'cms-product-spotlight relative isolate w-full overflow-hidden py-16 md:py-20 lg:py-24'
 
 const collageSectionClassName =
-  'cms-collage-section mx-auto grid w-[min(1380px,calc(100%_-_30px))] grid-cols-1 items-center gap-8 py-12 md:py-20 lg:grid-cols-[minmax(420px,0.98fr)_minmax(360px,0.82fr)] lg:gap-20 lg:py-20 xl:gap-32'
+  'cms-collage-section mx-auto grid px-5 w-[min(1280px,calc(100%_-_0px))] grid-cols-1 items-center gap-8 py-12 md:py-20 lg:grid-cols-[minmax(420px,0.98fr)_minmax(360px,0.82fr)] lg:gap-20 lg:py-20 xl:gap-32'
 
 const collageMediaClassName = 'js-collage-media relative min-h-[360px] md:min-h-[560px] lg:min-h-[clamp(520px,47vw,780px)]'
 
@@ -135,37 +135,37 @@ const collageImageClassName =
 const collageCopyClassName = 'mx-auto max-w-[340px] text-center lg:mx-0 lg:max-w-2xl lg:text-left'
 
 const collageTitleClassName =
-  'm-0 font-[600] text-[22px] leading-tight tracking-normal text-[#121827] md:text-5xl lg:text-[clamp(3.1rem,5.1vw,5.2rem)] lg:leading-none'
+  'm-0 font-medium  md:font-semibold text-[20px] leading-tight tracking-[1.8] text-[#121827] md:text-5xl lg:text-[48px] lg:leading-none'
 
 const collageEyebrowClassName =
-  'mt-5 mb-0 text-[18px] font-extrabold leading-snug text-[var(--color-brand-orange)] md:mt-6 md:text-[20px]'
+  'mt-5 mb-0 text-[18px]  leading-snug text-[var(--color-brand-orange)] md:mt-6 md:text-[20px] font-[500] md:font-600 '
 
 const collageDescriptionClassName =
-  'mt-5 mb-0 text-base leading-6 text-[#3f4656] md:mt-6 md:text-[18px] md:leading-7 lg:text-[20px]'
+  'mt-5 mb-0 text-[16px] leading-6 font-[400] text-[#374151] md:mt-6 md:text-[18px] md:leading-7 lg:text-[20px]'
 
 const resourcesSectionClassName =
-  'cms-resources-learning-section mx-auto grid w-[min(1380px,calc(100%_-_30px))] grid-cols-1 items-start gap-5 py-10 text-center md:gap-8 md:py-16 lg:grid-cols-[minmax(280px,0.76fr)_minmax(420px,1fr)] lg:gap-20 lg:text-left xl:gap-32'
+  'cms-resources-learning-section mx-auto grid px-5 w-[min(1280px,calc(100%_-_0px))] grid-cols-1 items-start gap-5 py-10 text-center md:gap-8 md:py-16 lg:grid-cols-[minmax(280px,0.76fr)_minmax(420px,1fr)] lg:gap-20 lg:text-left xl:gap-32'
 
 const resourcesHeadingWrapClassName = 'min-w-0'
 
 const resourcesHeadingClassName =
-  'js-resources-heading m-0 font-[600] text-[22px] leading-tight tracking-normal text-[#121827] md:text-5xl lg:text-[clamp(2.4rem,3.4vw,4.5rem)]'
+  'js-resources-heading m-0 !font-[500] md:font-[600] text-[20px] leading-sung tracking-normal text-[#111827] md:text-5xl lg:text-[48px]'
 
 const resourcesCopyClassName = 'mx-auto grid max-w-[340px] gap-4 md:max-w-3xl md:gap-7 lg:mx-0'
 
-const resourcesIntroClassName = 'js-resources-copy-item m-0 text-[18px] font-extrabold leading-snug text-[var(--color-brand-orange)] md:text-xl lg:text-[#121827]'
+const resourcesIntroClassName = 'js-resources-copy-item m-0 text-[16px] text-[#FB612E] font-medium md:font-semibold leading-snug text-[var(--color-brand-orange)] md:text-[20px] lg:text-[#121827]'
 
-const resourcesDescriptionClassName = 'js-resources-copy-item m-0 text-base leading-6 text-[#3f4656] md:text-lg md:leading-7'
+const resourcesDescriptionClassName = 'js-resources-copy-item m-0 text-base leading-6 text-[#3f4656] text-[16px] md:text-[20px] font-normal md:leading-7'
 
 const featuredSectionClassName =
-  'cms-featured-projects-section mx-auto grid w-[min(1380px,calc(100%_-_30px))] gap-8 py-12 md:gap-12 md:py-16 lg:gap-16 lg:py-20'
+  'cms-featured-projects-section mx-auto grid px-5 w-[min(1280px,calc(100%_-_0px))] gap-8 py-12 md:gap-12 md:py-16 lg:gap-16 lg:py-20'
 
 const featuredHeadingClassName =
-  'js-featured-heading m-0 text-center font-[600] text-4xl leading-tight tracking-normal text-[#121827] md:text-6xl lg:text-[clamp(2.7rem,4.6vw,5.5rem)]'
+  'js-featured-heading m-0 text-center font-[500] md:font-[600] text-[20px] leading-tight tracking-normal text-[#111827] md:text-6xl lg:text-[48px]'
 
 const cmsPageClassName = 'flex flex-col w-full gap-8 bg-white md:gap-12 lg:gap-20'
 
-const leadingHeroPageClassName = 'pt-0 md:pt-4 overflow-hidden'
+const leadingHeroPageClassName = ' overflow-hidden'
 
 function HeroSplitTitle({title, dataSanity}: {title: string; dataSanity?: string}) {
   const cleanTitle = stegaClean(title)
@@ -259,7 +259,7 @@ function HeroBlockSection({block, pageId}: {block: Extract<CmsContentBlock, {_ty
           <div className={heroActionColumnClassName}>
             {block.description ? <p className={heroDescriptionClassName}>{block.description}</p> : null}
             {block.cta && block.cta.length > 0 ? (
-              <div className={heroCtaRowClassName}>
+              <div className={`${heroCtaRowClassName} flex justify-center md:justify-start`}>
                 {block.cta.map((button, index) => (
                   <CmsButtonLink
                     key={button._key || `${button.text}-${index}`}
@@ -453,7 +453,7 @@ function ImageCollageCtaSection({
         {block.eyebrow ? <p className={cx(collageEyebrowClassName, 'js-collage-copy-item')}>{block.eyebrow}</p> : null}
         {block.description ? <p className={cx(collageDescriptionClassName, 'js-collage-copy-item')}>{block.description}</p> : null}
         <div className="js-collage-copy-item">
-          <CmsButtonsRow buttons={block.cta} className="mt-7 justify-center md:mt-9 lg:justify-start" buttonClassName="!min-h-14 !w-full !min-w-full !rounded-[8px] !text-[15px] !px-7 !font-extrabold sm:!w-auto sm:!min-w-44 lg:!rounded-[6px]" />
+          <CmsButtonsRow buttons={block.cta} className="mt-7 justify-center md:mt-9 lg:justify-start" buttonClassName="!min-h-12 md:!min-h-[60px] !w-full !min-w-full  !rounded-[10px] md:!rounded-[8px] tracking-[1.6] !text-[16px]  !font-semibold sm:!w-[170px] sm:!min-w-47 " />
         </div>
       </div>
     </section>
@@ -609,7 +609,7 @@ function ResourcesLearningSection({
       <div className={resourcesHeadingWrapClassName}>
         <h2 className={resourcesHeadingClassName}>{block.title || 'Resources & Learning'}</h2>
         <div className="js-resources-cta">
-          <CmsButtonsRow buttons={block.cta} className="mt-10 justify-center md:mt-6 lg:justify-start" buttonClassName="md:!min-h-14 !min-h-10 !w-full !min-w-full md:!rounded-lg !px-6 !font-extrabold sm:!w-auto sm:!min-w-44" />
+          <CmsButtonsRow buttons={block.cta} className="hidden md:block mt-10 justify-center md:mt-6 lg:justify-start" buttonClassName="md:!min-h-[60px] !min-h-12 !w-full !min-w-full md:!rounded-[8px] !rounded-[10px] !px-6 !font-semibold !text-[16px] sm:!w-auto sm:!min-w-52" />
         </div>
       </div>
 
@@ -618,6 +618,9 @@ function ResourcesLearningSection({
         {block.description ? (
           <p className={resourcesDescriptionClassName}>{block.description}</p>
         ) : null}
+        <div className="js-resources-cta">
+          <CmsButtonsRow buttons={block.cta} className="mt-10 md:hidden justify-center md:mt-6 lg:justify-start" buttonClassName="md:!min-h-14 !min-h-12 !w-full !min-w-full md:!rounded-[8px] !rounded-[10px] !px-6 !font-semibold !text-[16px] sm:!w-auto sm:!min-w-52" />
+        </div>
       </div>
     </section>
   )
@@ -662,7 +665,7 @@ function FeaturedProjectsSection({
         <FeaturedProjectsSlider projects={projects} arrowHref={arrowHref} />
       </div>
       <div className="js-featured-cta">
-        <CmsButtonsRow buttons={block.cta} className="justify-center" buttonClassName="!min-h-14 !min-w-48 !rounded-lg !px-7 !font-extrabold" />
+        <CmsButtonsRow buttons={block.cta} className="justify-center" buttonClassName="!min-h-12 md:!min-h-[60px] !min-w-48 !rounded-[10px] md:!rounded-[8px] !px-7 !font-semibold !text-[16px]" />
       </div>
     </section>
   )
@@ -726,7 +729,7 @@ export function CmsPageView({page}: {page: CmsPage}) {
   }
 
   return (
-    <main className={cx(cmsPageClassName, hasLeadingHero && leadingHeroPageClassName)}>
+    <main className={cx(cmsPageClassName, hasLeadingHero && leadingHeroPageClassName )}>
       {hasImageCollage ? <ImageCollageAnimations /> : null}
       {hasResourcesOrProjects ? <ResourcesProjectsAnimations /> : null}
       {blocks.map((block, index) => (
