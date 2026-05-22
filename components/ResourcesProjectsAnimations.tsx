@@ -22,8 +22,15 @@ export default function ResourcesProjectsAnimations() {
 
     const resourcesSections = gsap.utils.toArray<HTMLElement>('.cms-resources-learning-section')
     const projectSections = gsap.utils.toArray<HTMLElement>('.cms-featured-projects-section')
+    const statsSections = gsap.utils.toArray<HTMLElement>('.cms-stats-section')
+    const ctaSections = gsap.utils.toArray<HTMLElement>('.cms-cta-banner-section')
 
-    if (resourcesSections.length === 0 && projectSections.length === 0) {
+    if (
+      resourcesSections.length === 0 &&
+      projectSections.length === 0 &&
+      statsSections.length === 0 &&
+      ctaSections.length === 0
+    ) {
       return
     }
 
@@ -137,6 +144,57 @@ export default function ResourcesProjectsAnimations() {
             },
           })
         }
+      })
+
+      statsSections.forEach((section) => {
+        const heading = section.querySelector<HTMLElement>('.js-stats-heading')
+        const tiles = gsap.utils.toArray<HTMLElement>('.js-stat-tile', section)
+
+        gsap.set(compactElements([heading]), {autoAlpha: 0, y: 26})
+        gsap.set(tiles, {autoAlpha: 0, y: 26, scale: 0.96})
+
+        const reveal = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 82%',
+            once: true,
+          },
+          defaults: {ease: 'power3.out'},
+        })
+
+        if (heading) {
+          reveal.to(heading, {autoAlpha: 1, y: 0, duration: 0.72}, 0)
+        }
+
+        if (tiles.length > 0) {
+          reveal.to(
+            tiles,
+            {autoAlpha: 1, y: 0, scale: 1, duration: 0.68, stagger: 0.08},
+            heading ? 0.12 : 0,
+          )
+        }
+      })
+
+      ctaSections.forEach((section) => {
+        const items = gsap.utils.toArray<HTMLElement>('.js-cta-banner-item', section)
+
+        if (items.length === 0) {
+          return
+        }
+
+        gsap.set(items, {autoAlpha: 0, y: 24})
+        gsap.to(items, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.72,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 84%',
+            once: true,
+          },
+        })
       })
     })
 
