@@ -2,10 +2,12 @@ import { SearchIcon } from "@sanity/icons";
 import Link from "next/link";
 import { mediaImageUrl } from "@/lib/sanity";
 import type { SiteSettings } from "@/lib/cms";
-import { resolveNavigationHref } from "@/lib/cms";
-import NavigationLink from "@/components/layout/NavigationLink";
-import MobileMenuClient, { type MobileLink } from "@/components/layout/MobileMenuClient";
-
+import { resolveNavigationHref } from "@/lib/navigation";
+import MobileMenuClient, {
+  type MobileLink,
+} from "@/components/layout/MobileMenuClient";
+import NavigationLink from "./NavigationLink";
+import HeaderWrapper from "./HeaderWapper";
 type SiteHeaderProps = {
   siteSettings: SiteSettings | null;
 };
@@ -16,27 +18,26 @@ const headerClassName =
 // Mobile: 1fr (brand fills space, pushes hamburger right) + auto (hamburger).
 // Desktop unchanged: auto (brand) + 1fr (nav) + auto (search).
 const headerInnerClassName =
-  "mx-auto grid w-[calc(100%_-_18px)] grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 pt-5 md:w-[calc(100%_-_30px)] md:grid-cols-[auto_1fr_auto] md:gap-4 lg:w-[min(1680px,calc(100%_-_80px))] lg:gap-6 lg:pt-7";
+  "mx-auto grid  w-[calc(100%_-_24px)] grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 pt-5 md:w-[calc(100%_-_30px)] md:grid-cols-[auto_1fr_auto] md:gap-4 lg:w-[min(1280px,calc(100%_-_0px))] lg:gap-6 lg:pt-7";
 
 const brandClassName =
   "brand row-start-1 font-[var(--font-display)] text-2xl font-bold tracking-[-0.02em] text-[#111111] transition-colors duration-300 md:text-[clamp(1.55rem,1.7vw,2.1rem)]";
 
-const logoClassName =
-  "brand-logo h-[32px] w-auto lg:h-[44px]";
+const logoClassName = "brand-logo h-[32px] w-auto lg:h-[44px]";
 
 const brandPlaceholderClassName =
   "h-11 w-11 md:h-[52px] md:w-[52px] lg:h-[clamp(36px,4.2vw,62px)] lg:w-[clamp(36px,4.2vw,62px)]";
 
 // hidden on mobile, flex on desktop — keeps desktop layout identical
 const navClassName =
-  "top-nav col-span-2 row-start-2 hidden min-h-11 w-full flex-nowrap items-center justify-start gap-4 overflow-x-auto rounded-full border border-black/10 bg-white/12 text-black/90 px-4 shadow-[inset_1.22px_1.13px_4.62px_0px_rgba(255,255,255,0.125),0px_0px_48px_-12px_rgba(255,255,255,0.149)] backdrop-blur-[15.16px] transition-[background-color,border-color,color,box-shadow] duration-300 [scrollbar-width:thin] md:col-span-1 md:col-start-2 md:row-start-1 md:flex md:min-h-12 md:w-auto md:flex-wrap md:justify-center md:gap-5 md:justify-self-center md:px-6 lg:gap-7";
+  "top-nav col-span-2 row-start-2 hidden min-h-11 w-full flex-nowrap items-center justify-start gap-4  rounded-full  text-[#FFFFFF] px-4  transition-[background-color,border-color,color,box-shadow] duration-300 [scrollbar-width:thin] md:col-span-1 md:col-start-2 md:row-start-1 md:flex md:min-h-12 md:w-auto md:flex-wrap md:justify-center md:gap-5 md:justify-self-center md:px-6 lg:gap-7 relative border border-white/20 bg-white/[0.08] backdrop-blur-[15px] shadow-[0_0_48px_-12px_rgba(255,255,255,0.15)] relative overflow-hidden before:absolute before:inset-0 before:rounded-full before:shadow-[inset_1.22px_1.13px_4.62px_rgba(255,255,255,0.126)]  before:pointer-events-none";
 
 const navLinkClassName =
-  "top-nav-link relative whitespace-nowrap py-1.5 text-sm text-current transition-opacity duration-200 after:absolute after:inset-x-0 after:bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:rounded-full after:bg-current after:transition-transform after:duration-200 hover:opacity-75 hover:after:scale-x-100 focus-visible:opacity-75 focus-visible:after:scale-x-100 md:text-[0.92rem]";
+  "top-nav-link relative whitespace-nowrap py-1.5 text-[16px] font-[400] text-current transition-opacity duration-200 after:absolute after:inset-x-0 after:bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:rounded-full after:bg-current after:transition-transform after:duration-200 hover:opacity-75 hover:after:scale-x-100 focus-visible:opacity-75 focus-visible:after:scale-x-100 md:text-[0.92rem]";
 
 // hidden on mobile, visible on desktop — keeps desktop identical
 const searchClassName =
-  "top-search hidden md:grid text-[30px] !text-black/90 !fill-black/90 rounded-full border border-black/10 bg-white/12 p-2 shadow-[inset_1.22px_1.13px_4.62px_0px_rgba(255,255,255,0.125),0px_0px_48px_-12px_rgba(255,255,255,0.149)] backdrop-blur-[15.16px] mix-blend-difference place-items-center";
+  "top-search hidden md:grid text-[30px]  rounded-full  p-2  place-items-center !text-white transition-[background-color,border-color,color,box-shadow] duration-300 hover:bg-white/20 hover:border-white/30 hover:shadow-[0_0_48px_-8px_rgba(255,255,255,0.2)] focus-visible:bg-white/20 focus-visible:border-white/30 focus-visible:shadow-[0_0_48px_-8px_rgba(255,255,255,0.2)]";
 
 const searchPlaceholderClassName =
   "top-search-placeholder hidden md:block row-start-1 h-10 w-10 justify-self-end";
@@ -61,10 +62,10 @@ export default function SiteHeader({ siteSettings }: SiteHeaderProps) {
   const searchUrl = siteSettings?.headerSearchUrl?.trim();
   const showSearch = Boolean(siteSettings?.showHeaderSearch && searchUrl);
   const isExternalSearchUrl = Boolean(
-    searchUrl && /^https?:\/\//.test(searchUrl),
+    searchUrl && /^https?:\/\//.test(searchUrl)
   );
   const showHeader = Boolean(
-    logoUrl || siteTitle || headerLinks.length > 0 || showSearch,
+    logoUrl || siteTitle || headerLinks.length > 0 || showSearch
   );
 
   if (!showHeader) {
@@ -76,11 +77,18 @@ export default function SiteHeader({ siteSettings }: SiteHeaderProps) {
     const resolved = resolveNavigationHref(item);
     const label = item.label || item.internalLink?.title;
     if (!resolved.href || !label) return [];
-    return [{label, href: resolved.href, isExternal: resolved.isExternal, openInNewTab: resolved.openInNewTab}];
+    return [
+      {
+        label,
+        href: resolved.href,
+        isExternal: resolved.isExternal,
+        openInNewTab: resolved.openInNewTab,
+      },
+    ];
   });
 
   return (
-    <header className={headerClassName}>
+    <HeaderWrapper className={headerClassName}>
       <div className={headerInnerClassName}>
         {/* Brand */}
         {logoUrl || siteTitle ? (
@@ -100,6 +108,8 @@ export default function SiteHeader({ siteSettings }: SiteHeaderProps) {
         )}
 
         {/* Desktop nav — hidden on mobile, identical on desktop */}
+
+        {/* NAVBAR */}
         <nav className={navClassName}>
           {headerLinks.map((item, index) => (
             <NavigationLink
@@ -114,7 +124,19 @@ export default function SiteHeader({ siteSettings }: SiteHeaderProps) {
         {showSearch ? (
           isExternalSearchUrl ? (
             <a className={searchClassName} href={searchUrl} aria-label="Search">
-              <SearchIcon />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-6.5 h-6.5 relative z-10"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20L16.65 16.65" />
+              </svg>
             </a>
           ) : (
             <Link
@@ -122,7 +144,19 @@ export default function SiteHeader({ siteSettings }: SiteHeaderProps) {
               href={searchUrl as string}
               aria-label="Search"
             >
-              <SearchIcon />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-6.5 h-6.5 relative z-10"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20L16.65 16.65" />
+              </svg>
             </Link>
           )
         ) : (
@@ -136,6 +170,6 @@ export default function SiteHeader({ siteSettings }: SiteHeaderProps) {
           logoUrl={logoUrl ?? undefined}
         />
       </div>
-    </header>
+    </HeaderWrapper>
   );
 }

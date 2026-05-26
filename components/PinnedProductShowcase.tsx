@@ -44,7 +44,7 @@ type PinnedProductShowcaseProps = {
 gsap.registerPlugin(ScrollTrigger)
 
 const configureBtnCls =
-  'js-action-item group relative inline-flex h-[54px] flex-1 items-center justify-between gap-3 rounded-[2px] bg-[var(--color-brand-orange)] px-5 text-[0.95rem] font-extrabold tracking-tight text-white shadow-[0_10px_30px_rgba(255,95,46,0.36),inset_0_1px_0_rgba(255,255,255,0.18)] transition-all duration-200 hover:-translate-y-[2px] hover:shadow-[0_16px_38px_rgba(255,95,46,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] focus-visible:-translate-y-[2px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40'
+  'js-action-item group relative inline-flex h-[48px] md:h-[60px] flex-1 items-center justify-between gap-3 rounded-[2px] bg-[var(--color-brand-orange)] px-5 text-[1rem] font-medium md:font-semibold tracking-[1.6] !text-[#FFFFFF] shadow-[0_10px_30px_rgba(255,95,46,0.36),inset_0_1px_0_rgba(255,255,255,0.18)] transition-all duration-200 hover:-translate-y-[2px] hover:shadow-[0_16px_38px_rgba(255,95,46,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] focus-visible:-translate-y-[2px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40'
 
 function ConfigureButton({link, fallbackHref}: {link: ShowcaseLink | undefined; fallbackHref: string}) {
   const text = link?.text || 'Configure now'
@@ -158,11 +158,11 @@ export default function PinnedProductShowcase({
   }, [])
 
   const iconBtnCls =
-    'js-action-item grid h-[54px] w-[54px] flex-shrink-0 place-items-center rounded-[2px] border border-white/70 bg-white text-xl text-[var(--color-brand-orange)] shadow-[0_10px_28px_rgba(16,24,40,0.18),0_2px_6px_rgba(16,24,40,0.06)] transition-all duration-200 hover:-translate-y-[2px] hover:border-[rgba(255,95,46,0.32)] hover:shadow-[0_16px_36px_rgba(16,24,40,0.22),0_2px_6px_rgba(16,24,40,0.08)] focus-visible:-translate-y-[2px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[rgba(255,95,46,0.5)]'
+    'js-action-item grid h-[48px] w-[48px] md:h-[60px] md:w-[60px] flex-shrink-0 place-items-center rounded-[2px] border border-white/70 bg-white text-xl text-[var(--color-brand-orange)] shadow-[0_10px_28px_rgba(16,24,40,0.18),0_2px_6px_rgba(16,24,40,0.06)] transition-all duration-200 hover:-translate-y-[2px] hover:border-[rgba(255,95,46,0.32)] hover:shadow-[0_16px_36px_rgba(16,24,40,0.22),0_2px_6px_rgba(16,24,40,0.08)] focus-visible:-translate-y-[2px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[rgba(255,95,46,0.5)]'
 
   return (
     <section ref={sectionRef} className="relative hidden bg-[#0b0c0e] md:block">
-      <div ref={sceneRef} className="relative overflow-hidden px-5 py-16 md:h-screen md:min-h-[760px] md:overflow-visible md:p-0">
+      <div ref={sceneRef} className="relative overflow-hidden px-5  py-16 md:h-screen md:min-h-[760px] md:overflow-visible md:p-0">
 
         {/* Background */}
         <div className="absolute inset-0" aria-hidden>
@@ -183,7 +183,7 @@ export default function PinnedProductShowcase({
         </div>
 
         {/* Inner max-width container */}
-        <div className="relative z-[5] mx-auto h-full w-[calc(100%-32px)] md:w-[calc(100%-80px)] lg:w-[min(1680px,calc(100%-80px))]">
+        <div className="relative z-[5] mx-auto h-full w-[calc(100%-24px)] md:w-[calc(100%-80px)] lg:w-[min(1280px,calc(100%-0px))]">
 
           {/* Left column: pinned title */}
           <div className="relative z-[6] mb-8 md:absolute md:left-0 md:top-1/2 md:mb-0 md:w-[clamp(200px,28vw,460px)] md:-translate-y-1/2">

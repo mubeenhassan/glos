@@ -1,5 +1,8 @@
 import Link from 'next/link'
-import {resolveNavigationHref, type CmsNavigationItem} from '@/lib/cms'
+import {
+  resolveNavigationHref,
+  type CmsNavigationItem,
+} from "@/lib/navigation";
 
 type NavigationLinkProps = {
   item: CmsNavigationItem
