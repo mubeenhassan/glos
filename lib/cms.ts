@@ -2,7 +2,7 @@ import 'server-only'
 import {fetchSanity, type SanityImage} from '@/lib/sanity'
 
 export type CmsInternalLink = {
-  _type?: 'page' | 'product'
+  _type?: 'page' | 'product' | 'project'
   title?: string
   slug?: string
 }
@@ -198,6 +198,43 @@ export type CmsFeaturedProjectsBlock = {
   cta?: CmsButton[]
 }
 
+export type CmsProjectsListingBlock = {
+  _key?: string
+  _type: 'projectsListingBlock'
+  title?: string
+  description?: string
+  showAllFilter?: boolean
+  allFilterLabel?: string
+  categories?: {
+    _key?: string
+    value?: string
+    label?: string
+  }[]
+  maxItems?: number
+}
+
+export type CmsStatTile = {
+  _key?: string
+  value?: string
+  label?: string
+}
+
+export type CmsStatsBlock = {
+  _key?: string
+  _type: 'statsBlock'
+  heading?: string
+  stats?: CmsStatTile[]
+}
+
+export type CmsCtaBannerBlock = {
+  _key?: string
+  _type: 'ctaBannerBlock'
+  heading?: string
+  description?: string
+  cta?: CmsButton[]
+  tone?: 'subtle' | 'dark' | 'brand'
+}
+
 export type CmsContentBlock =
   | CmsHeroBlock
   | CmsContentImageCtaBlock
@@ -207,6 +244,9 @@ export type CmsContentBlock =
   | CmsPinnedProductShowcaseBlock
   | CmsResourcesLearningBlock
   | CmsFeaturedProjectsBlock
+  | CmsProjectsListingBlock
+  | CmsStatsBlock
+  | CmsCtaBannerBlock
 
 export type CmsSeo = {
   metaTitle?: string
@@ -424,6 +464,32 @@ const PAGE_QUERY = `*[_type == "page" && slug.current == $slug][0]{
         coverImage
       },
       cta[]{${BUTTON_QUERY_FIELDS}}
+    },
+    _type == "projectsListingBlock" => {
+      title,
+      description,
+      showAllFilter,
+      allFilterLabel,
+      categories[]{
+        _key,
+        value,
+        label
+      },
+      maxItems
+    },
+    _type == "statsBlock" => {
+      heading,
+      stats[]{
+        _key,
+        value,
+        label
+      }
+    },
+    _type == "ctaBannerBlock" => {
+      heading,
+      description,
+      tone,
+      cta[]{${BUTTON_QUERY_FIELDS}}
     }
   },
   seo{
@@ -501,6 +567,10 @@ export function resolveInternalHref(link: CmsInternalLink | null | undefined) {
 
   if (link._type === 'product') {
     return `/products/${link.slug}`
+  }
+
+  if (link._type === 'project') {
+    return `/projects/${link.slug}`
   }
 
   return null

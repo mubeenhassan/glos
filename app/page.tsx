@@ -2,8 +2,14 @@ import Link from 'next/link'
 import {CmsPageView} from '@/components/CmsPageView'
 import {getPageBySlug} from '@/lib/cms'
 
-export default async function HomePage() {
-  const page = await getPageBySlug('home')
+type SearchParams = Record<string, string | string[] | undefined>
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}) {
+  const [page, params] = await Promise.all([getPageBySlug('home'), searchParams])
 
   if (!page) {
     return (
@@ -26,5 +32,5 @@ export default async function HomePage() {
     )
   }
 
-  return <CmsPageView page={page} />
+  return <CmsPageView page={page} searchParams={params} basePath="/" />
 }

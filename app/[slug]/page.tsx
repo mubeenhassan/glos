@@ -6,16 +6,16 @@ type DynamicPageProps = {
   params: Promise<{
     slug: string
   }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function DynamicPage({params}: DynamicPageProps) {
-  const {slug} = await params
+export default async function DynamicPage({params, searchParams}: DynamicPageProps) {
+  const [{slug}, resolvedSearchParams] = await Promise.all([params, searchParams])
 
   const page = await getPageBySlug(slug)
   if (!page) {
     notFound()
   }
 
-  return <CmsPageView page={page} />
+  return <CmsPageView page={page} searchParams={resolvedSearchParams} basePath={`/${slug}`} />
 }
-

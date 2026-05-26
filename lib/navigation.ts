@@ -1,5 +1,5 @@
 export type CmsInternalLink = {
-  _type?: "page" | "product";
+  _type?: "page" | "product" | "project";
   title?: string;
   slug?: string;
 };
@@ -29,6 +29,10 @@ function resolveInternalHref(
 
   if (link._type === "product") {
     return `/products/${link.slug}`;
+  }
+
+  if (link._type === "project") {
+    return `/projects/${link.slug}`;
   }
 
   return null;
