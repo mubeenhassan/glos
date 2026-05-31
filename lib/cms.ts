@@ -235,6 +235,180 @@ export type CmsCtaBannerBlock = {
   tone?: 'subtle' | 'dark' | 'brand'
 }
 
+export type CmsBrandFoundationBlock = {
+  _key?: string
+  _type: 'brandFoundationBlock'
+  introTitle?: string
+  introTagline?: string
+  sectionTitle?: string
+  mainImage?: CmsImage
+  supportingImages?: CmsImage[]
+  paragraphs?: {
+    _key?: string
+    text?: string
+  }[]
+}
+
+export type CmsDesignPhilosophyBlock = {
+  _key?: string
+  _type: 'designPhilosophyBlock'
+  title?: string
+  paragraphs?: {
+    _key?: string
+    text?: string
+  }[]
+  collageCenter?: CmsImage
+  collageTopLeft?: CmsImage
+  collageTopRight?: CmsImage
+  collageBottomLeft?: CmsImage
+  collageBottomRight?: CmsImage
+}
+
+export type CmsOurVisionBlock = {
+  _key?: string
+  _type: 'ourVisionBlock'
+  title?: string
+  paragraphs?: {
+    _key?: string
+    text?: string
+  }[]
+  backgroundImage?: CmsImage
+  galleryTopLeft?: CmsImage
+  galleryTopCenter?: CmsImage
+  galleryTopRight?: CmsImage
+  galleryBottomLeft?: CmsImage
+  galleryBottomCenter?: CmsImage
+  galleryBottomRight?: CmsImage
+}
+
+export type CmsOurPurposeBlock = {
+  _key?: string
+  _type: 'ourPurposeBlock'
+  title?: string
+  description?: string
+  image?: CmsImage
+}
+
+export type CmsWhyGlosFeature = {
+  _key?: string
+  title?: string
+  description?: string
+}
+
+export type CmsWhyGlosBlock = {
+  _key?: string
+  _type: 'whyGlosBlock'
+  title?: string
+  eyebrow?: string
+  description?: string
+  backgroundImage?: CmsImage
+  features?: CmsWhyGlosFeature[]
+}
+
+export type CmsCoreStrengthItem = {
+  _key?: string
+  title?: string
+  description?: string
+  icon?: CmsImage
+}
+
+export type CmsCoreStrengthsBlock = {
+  _key?: string
+  _type: 'coreStrengthsBlock'
+  title?: string
+  strengths?: CmsCoreStrengthItem[]
+}
+
+export type CmsCoreHighlightItem = {
+  _key?: string
+  title?: string
+  description?: string
+}
+
+export type CmsCoreHighlightsBlock = {
+  _key?: string
+  _type: 'coreHighlightsBlock'
+  title?: string
+  backgroundImage?: CmsImage
+  highlights?: CmsCoreHighlightItem[]
+}
+
+export type CmsPageIntroBlock = {
+  _key?: string
+  _type: 'pageIntroBlock'
+  title?: string
+  tagline?: string
+}
+
+export type CmsResourcesDownloadsBlock = {
+  _key?: string
+  _type: 'resourcesDownloadsBlock'
+  tabs?: {
+    _key?: string
+    value?: string
+    label?: string
+  }[]
+  emptyStateMessage?: string
+  resources?: {
+    _key?: string
+    _ref?: string
+  }[]
+}
+
+export type CmsFaqSectionBlock = {
+  _key?: string
+  _type: 'faqSectionBlock'
+  title?: string
+  entries?: {
+    _key?: string
+    _ref?: string
+  }[]
+}
+
+export type CmsContactOfficeCard = {
+  _key?: string
+  city?: string
+  address?: string
+  phone?: string
+  email?: string
+}
+
+export type CmsContactFormField = {
+  _key?: string
+  label?: string
+  name?: string
+  fieldType?: 'text' | 'email' | 'tel' | 'textarea'
+  placeholder?: string
+  required?: boolean
+}
+
+export type CmsBusinessHoursRow = {
+  _key?: string
+  label?: string
+  hours?: string
+}
+
+export type CmsContactSectionBlock = {
+  _key?: string
+  _type: 'contactSectionBlock'
+  formTitle?: string
+  officesTitle?: string
+  offices?: CmsContactOfficeCard[]
+  formFields?: CmsContactFormField[]
+  submitLabel?: string
+  businessHoursTitle?: string
+  businessHours?: CmsBusinessHoursRow[]
+}
+
+export type CmsFindUsMapBlock = {
+  _key?: string
+  _type: 'findUsMapBlock'
+  title?: string
+  embedInputType?: 'url' | 'html'
+  embedUrl?: string
+  embedHtml?: string
+}
+
 export type CmsContentBlock =
   | CmsHeroBlock
   | CmsContentImageCtaBlock
@@ -247,6 +421,18 @@ export type CmsContentBlock =
   | CmsProjectsListingBlock
   | CmsStatsBlock
   | CmsCtaBannerBlock
+  | CmsBrandFoundationBlock
+  | CmsDesignPhilosophyBlock
+  | CmsOurVisionBlock
+  | CmsOurPurposeBlock
+  | CmsWhyGlosBlock
+  | CmsCoreStrengthsBlock
+  | CmsCoreHighlightsBlock
+  | CmsPageIntroBlock
+  | CmsResourcesDownloadsBlock
+  | CmsFaqSectionBlock
+  | CmsContactSectionBlock
+  | CmsFindUsMapBlock
 
 export type CmsSeo = {
   metaTitle?: string
@@ -490,6 +676,132 @@ const PAGE_QUERY = `*[_type == "page" && slug.current == $slug][0]{
       description,
       tone,
       cta[]{${BUTTON_QUERY_FIELDS}}
+    },
+    _type == "brandFoundationBlock" => {
+      introTitle,
+      introTagline,
+      sectionTitle,
+      mainImage,
+      supportingImages,
+      paragraphs[]{
+        _key,
+        text
+      }
+    },
+    _type == "designPhilosophyBlock" => {
+      title,
+      paragraphs[]{
+        _key,
+        text
+      },
+      collageCenter,
+      collageTopLeft,
+      collageTopRight,
+      collageBottomLeft,
+      collageBottomRight
+    },
+    _type == "ourVisionBlock" => {
+      title,
+      paragraphs[]{
+        _key,
+        text
+      },
+      backgroundImage,
+      galleryTopLeft,
+      galleryTopCenter,
+      galleryTopRight,
+      galleryBottomLeft,
+      galleryBottomCenter,
+      galleryBottomRight
+    },
+    _type == "ourPurposeBlock" => {
+      title,
+      description,
+      image
+    },
+    _type == "whyGlosBlock" => {
+      title,
+      eyebrow,
+      description,
+      backgroundImage,
+      features[]{
+        _key,
+        title,
+        description
+      }
+    },
+    _type == "coreStrengthsBlock" => {
+      title,
+      strengths[]{
+        _key,
+        title,
+        description,
+        icon
+      }
+    },
+    _type == "coreHighlightsBlock" => {
+      title,
+      backgroundImage,
+      highlights[]{
+        _key,
+        title,
+        description
+      }
+    },
+    _type == "pageIntroBlock" => {
+      title,
+      tagline
+    },
+    _type == "resourcesDownloadsBlock" => {
+      tabs[]{
+        _key,
+        value,
+        label
+      },
+      emptyStateMessage,
+      resources[]{
+        _key,
+        _ref
+      }
+    },
+    _type == "faqSectionBlock" => {
+      title,
+      entries[]{
+        _key,
+        _ref
+      }
+    },
+    _type == "contactSectionBlock" => {
+      formTitle,
+      officesTitle,
+      offices[]{
+        _key,
+        city,
+        address,
+        phone,
+        email
+      },
+      formFields[]{
+        _key,
+        label,
+        name,
+        fieldType,
+        placeholder,
+        required
+      },
+      submitLabel,
+      businessHoursTitle,
+      businessHours[]{
+        _key,
+        label,
+        hours
+      }
+    },
+    _type == "findUsMapBlock" => {
+      title,
+      embedInputType,
+      embedUrl,
+      embedHtml
     }
   },
   seo{

@@ -18,7 +18,7 @@ const headerClassName =
 // Mobile: 1fr (brand fills space, pushes hamburger right) + auto (hamburger).
 // Desktop unchanged: auto (brand) + 1fr (nav) + auto (search).
 const headerInnerClassName =
-  "mx-auto grid  w-[calc(100%_-_24px)] grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 pt-5 md:w-[calc(100%_-_30px)] md:grid-cols-[auto_1fr_auto] md:gap-4 lg:w-[min(1280px,calc(100%_-_0px))] lg:gap-6 lg:pt-7";
+  "cms-section-width grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 pt-5 md:grid-cols-[auto_1fr_auto] md:gap-4 lg:gap-6 lg:pt-7";
 
 const brandClassName =
   "brand row-start-1 font-[var(--font-display)] text-2xl font-bold tracking-[-0.02em] text-[#111111] transition-colors duration-300 md:text-[clamp(1.55rem,1.7vw,2.1rem)]";

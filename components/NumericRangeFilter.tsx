@@ -98,7 +98,7 @@ export default function NumericRangeFilter({
           aria-label={`${paramKey} maximum`}
         />
       </div>
-      <div className="filter-range-caption-row">
+      <div className="filter-range-caption-row sr-only">
         <span className="meta">
           {formatRangeValue(minValue)}
           {unit ? ` ${unit}` : ''} - {formatRangeValue(maxValue)}

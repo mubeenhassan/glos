@@ -183,7 +183,7 @@ export default function PinnedProductShowcase({
         </div>
 
         {/* Inner max-width container */}
-        <div className="relative z-[5] mx-auto h-full w-[calc(100%-24px)] md:w-[calc(100%-80px)] lg:w-[min(1280px,calc(100%-0px))]">
+        <div className="cms-section-width relative z-[5] h-full">
 
           {/* Left column: pinned title */}
           <div className="relative z-[6] mb-8 md:absolute md:left-0 md:top-1/2 md:mb-0 md:w-[clamp(200px,28vw,460px)] md:-translate-y-1/2">

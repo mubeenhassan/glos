@@ -1,13 +1,12 @@
 import { mediaImageUrl } from "@/lib/sanity";
 import { CmsButtonsRow } from "@/components/cms/CmsButtons";
 import type { CmsBlockProps } from "@/components/cms/types";
-import { cx } from "@/components/cms/utils";
+import { cmsSectionWidthClassName, cx } from "@/components/cms/utils";
 
 const sectionHeadingClassName =
   "m-0 font-[600] text-3xl font-semibold leading-tight tracking-[-0.02em] text-[#121827] md:text-4xl lg:text-5xl";
 
-const splitSectionClassName =
-  "mx-auto w-[min(1380px,calc(100%_-_30px))] py-4 md:py-6";
+const splitSectionClassName = cx(cmsSectionWidthClassName, "py-4 md:py-6");
 
 const splitGridClassName = "grid grid-cols-1 items-center gap-4 lg:grid-cols-2";
 

@@ -42,6 +42,10 @@ export type ResourceAsset = {
   title: string
   type: string
   externalUrl?: string
+  fileUrl?: string
+  fileByteSize?: number
+  fileSizeLabel?: string
+  downloadLabel?: string
 }
 
 export type MediaItem = {
@@ -333,7 +337,9 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
     _id,
     title,
     type,
-    externalUrl
+    externalUrl,
+    "fileUrl": coalesce(externalUrl, file.asset->url),
+    "fileByteSize": file.asset->size
   },
   featureBlocks[]{
     _key,
@@ -393,7 +399,14 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
       singleOptionValue->{_id, label, value},
       multiOptionValues[]->{_id, label, value}
     },
-    downloads[]->{_id, title, type, externalUrl}
+    downloads[]->{
+      _id,
+      title,
+      type,
+      externalUrl,
+      "fileUrl": coalesce(externalUrl, file.asset->url),
+      "fileByteSize": file.asset->size
+    }
   },
   "variants": *[_type == "productVariant" && references(^._id) && status == "active"] | order(coalesce(tableSortOrder, 9999) asc, sku asc) {
     _id,
@@ -421,7 +434,14 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
       singleOptionValue->{_id, label, value},
       multiOptionValues[]->{_id, label, value}
     },
-    downloads[]->{_id, title, type, externalUrl}
+    downloads[]->{
+      _id,
+      title,
+      type,
+      externalUrl,
+      "fileUrl": coalesce(externalUrl, file.asset->url),
+      "fileByteSize": file.asset->size
+    }
   }
 }`
 
@@ -437,7 +457,14 @@ const CONFIGURATOR_QUERY = `{
     "category": category->title,
     "family": family->title,
     heroMedia[]{_key, type, image, externalImageUrl, videoUrl},
-    resources[]->{_id, title, type, externalUrl},
+    resources[]->{
+      _id,
+      title,
+      type,
+      externalUrl,
+      "fileUrl": coalesce(externalUrl, file.asset->url),
+      "fileByteSize": file.asset->size
+    },
     "availableModels": *[_type == "product" && family._ref == ^.family._ref && status == "active"] | order(name asc) {
       _id,
       name,

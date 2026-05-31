@@ -6,7 +6,7 @@ import type { CmsBlockProps } from "@/components/cms/types";
 import { cx } from "@/components/cms/utils";
 
 const collageSectionClassName =
-  "cms-collage-section mx-auto grid w-[min(1380px,calc(100%_-_30px))] grid-cols-1 items-center gap-8 py-12 md:py-20 lg:grid-cols-[minmax(420px,0.98fr)_minmax(360px,0.82fr)] lg:gap-20 lg:py-20 xl:gap-32";
+  "cms-collage-section cms-section-width grid grid-cols-1 items-center gap-8 py-12 md:py-20 lg:grid-cols-[minmax(420px,0.98fr)_minmax(360px,0.82fr)] lg:gap-20 lg:py-20 xl:gap-32";
 
 const collageMediaClassName =
   "js-collage-media relative min-h-[360px] md:min-h-[560px] lg:min-h-[clamp(520px,47vw,780px)]";

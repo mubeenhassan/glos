@@ -7,7 +7,7 @@ import { CmsButtonsRow } from "@/components/cms/CmsButtons";
 import type { CmsBlockProps } from "@/components/cms/types";
 
 const featuredSectionClassName =
-  "cms-featured-projects-section mx-auto grid w-[min(1380px,calc(100%_-_30px))] gap-8 py-12 md:gap-12 md:py-16 lg:gap-16 lg:py-20";
+  "cms-featured-projects-section cms-section-width grid gap-8 py-12 md:gap-12 md:py-16 lg:gap-16 lg:py-20";
 
 const featuredHeadingClassName =
   "js-featured-heading m-0 text-center font-[600] text-4xl leading-tight tracking-normal text-[#121827] md:text-6xl lg:text-[clamp(2.7rem,4.6vw,5.5rem)]";

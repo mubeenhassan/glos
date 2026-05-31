@@ -182,7 +182,7 @@ export default function ProjectDetailPageView({
   ].filter((item): item is {label: string; value: string} => Boolean(item.value))
 
   return (
-    <main className="page-wrap project-detail-page mx-auto flex !w-[calc(100%_-_24px)] flex-col gap-7 pb-16 md:!w-[calc(100%_-_30px)] md:gap-16 md:pb-24 lg:!w-[min(1680px,calc(100%_-_80px))]">
+    <main className="page-wrap project-detail-page cms-section-width flex flex-col gap-7 pb-16 md:gap-16 md:pb-24">
       <ProjectDetailAnimations />
 
       <header className="flex flex-col-reverse md:grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:gap-10">

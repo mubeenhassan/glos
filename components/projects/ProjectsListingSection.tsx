@@ -13,11 +13,19 @@ import type {
   CmsBlockProps,
   CmsPageSearchParams,
 } from "@/components/cms/types";
-import { cleanOptionalText, cx, toSingleParam } from "@/components/cms/utils";
+import {
+  cleanOptionalText,
+  cmsSectionWidthClassName,
+  cx,
+  toSingleParam,
+} from "@/components/cms/utils";
 import ProjectsFilterChips from "@/components/projects/ProjectsFilterChips";
 
-const projectsListingSectionClassName =
-  "cms-projects-listing-section mx-auto w-[calc(100%_-_24px)] py-8 md:w-[calc(100%_-_60px)] md:py-14 lg:w-[min(1680px,calc(100%_-_80px))] lg:py-16 mt-8 md:mt-20";
+const projectsListingSectionClassName = cx(
+  "cms-projects-listing-section",
+  cmsSectionWidthClassName,
+  "py-8 md:py-14 lg:py-16 mt-8 md:mt-20",
+);
 
 const projectsListingHeaderClassName =
   "grid grid-cols-1 items-start gap-3 md:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.7fr)] md:gap-10";
