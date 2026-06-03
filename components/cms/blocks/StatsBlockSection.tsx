@@ -3,7 +3,7 @@ import { cleanOptionalText } from "@/components/cms/utils";
 import AnimatedStatValue from "@/components/cms/AnimatedStatValue";
 
 const statsSectionClassName =
-  "cms-stats-section mx-auto grid w-[calc(100%_-_36px)] gap-6 py-8 md:w-[calc(100%_-_60px)] md:gap-8 md:py-12 lg:w-[min(1680px,calc(100%_-_80px))]";
+  "cms-stats-section cms-section-width grid gap-6 py-8 md:gap-8 md:py-12";
 
 const statsHeadingClassName =
   "js-stats-heading m-0 max-w-3xl font-[600] text-3xl leading-tight tracking-normal text-[#121827] md:text-5xl";

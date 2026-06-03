@@ -55,7 +55,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://picsum.photos https://*.picsum.photos",
   "media-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://ssl.gstatic.com",
   `connect-src 'self' https://*.sanity.io https://cdn.sanity.io${isDev ? ' ws: wss:' : ''}`,
-  "frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
+  "frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://www.google.com https://google.com https://maps.google.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

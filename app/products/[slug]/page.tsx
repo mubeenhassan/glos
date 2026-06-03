@@ -1,284 +1,437 @@
-import Link from 'next/link'
+import Link from "next/link";
 import {
+  type ProductDetail,
   getProductBySlug,
-  groupSpecsByDisplayGroup,
   pickAttribute,
-} from '@/lib/catalog'
-import {mediaImageUrl, sanityImageUrl} from '@/lib/sanity'
+} from "@/lib/catalog";
+import ProductListingCard from "@/components/products/ProductListingCard";
+import ProductSpecificationsTab from "@/components/products/ProductSpecificationsTab";
+import ProductResourcesTab from "@/components/products/ProductResourcesTab";
+import { mediaImageUrl, sanityImageUrl } from "@/lib/sanity";
 
-type SearchParams = Record<string, string | string[] | undefined>
+type SearchParams = Record<string, string | string[] | undefined>;
 
 function toSingle(value: string | string[] | undefined) {
   if (Array.isArray(value)) {
-    return value[0]
+    return value[0];
   }
 
-  return value
+  return value;
+}
+
+function tabHref(slug: string, key: string) {
+  return `/products/${slug}?tab=${key}`;
+}
+
+function ProductFeatureSections({ product }: { product: ProductDetail }) {
+  if (!product.featureBlocks?.length) {
+    return null;
+  }
+
+  return (
+    <section className="mt-12 space-y-10 md:space-y-14">
+      {product.featureBlocks.map((block, index) => {
+        const mediaUrl = mediaImageUrl(block.media, 1200);
+        const reverse = block.alignment === "right" || index % 2 === 1;
+
+        return (
+          <article
+            key={block._key}
+            className={`grid items-center gap-6 md:grid-cols-2 md:gap-10 ${reverse ? "md:[&>*:first-child]:order-2" : ""}`}
+          >
+            <div className="overflow-hidden rounded-[8px] border border-[#eceef2] bg-[#f7f7f8]">
+              <div className="aspect-16/11">
+                {mediaUrl ? (
+                  <img
+                    src={mediaUrl}
+                    alt={block.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="product-placeholder h-full w-full" />
+                )}
+              </div>
+            </div>
+            <div>
+              <h3 className="m-0 text-[28px] font-semibold leading-[1.12] tracking-[-0.02em] text-[#111827] md:text-[34px]">
+                {block.title}
+              </h3>
+              {block.description ? (
+                <p className="m-0 mt-3 text-[15px] leading-7 text-[#4b5563] md:text-[16px]">
+                  {block.description}
+                </p>
+              ) : null}
+            </div>
+          </article>
+        );
+      })}
+    </section>
+  );
+}
+
+function RelatedProductsSection({ product }: { product: ProductDetail }) {
+  if (!product.relatedProducts?.length) {
+    return null;
+  }
+
+  return (
+    <section className="mt-14">
+      <h2 className="m-0 text-[20px] font-semibold leading-none tracking-[-0.02em] text-[#111827] md:text-[36px]">
+        Related Products
+      </h2>
+      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
+        {product.relatedProducts.map((related) => (
+          <ProductListingCard
+            key={related._id}
+            name={related.name}
+            slug={related.slug}
+            imageUrl={sanityImageUrl(related.listingCardImage, 620)}
+            listingBadgeText={related.listingBadgeText}
+          />
+        ))}
+      </div>
+    </section>
+  );
 }
 
 export default async function ProductDetailPage({
   params,
   searchParams,
 }: {
-  params: Promise<{slug: string}>
-  searchParams: Promise<SearchParams>
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<SearchParams>;
 }) {
-  const [{slug}, rawSearchParams] = await Promise.all([params, searchParams])
-  const product = await getProductBySlug(slug)
+  const [{ slug }, rawSearchParams] = await Promise.all([params, searchParams]);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     return (
       <main className="page-wrap">
         <section className="section">
           <h3>Product not found</h3>
-          <Link href="/products" className="btn" style={{marginTop: 10}}>
+          <Link href="/products" className="btn" style={{ marginTop: 10 }}>
             Back to products
           </Link>
         </section>
       </main>
-    )
+    );
   }
 
-  const heroMedia = product.heroMedia?.[0]
-  const heroImageUrl = mediaImageUrl(heroMedia, 1200)
+  const heroMedia = product.heroMedia?.[0];
+  const heroImageUrl = mediaImageUrl(heroMedia, 1200);
   const detailVariant =
-    product.detailVariant && product.variants.some((variant) => variant._id === product.detailVariant?._id)
+    product.detailVariant &&
+    product.variants.some(
+      (variant) => variant._id === product.detailVariant?._id,
+    )
       ? product.detailVariant
-      : product.variants[0]
+      : product.variants[0];
 
   const mergedSpecs = [
     ...(product.productAttributes || []),
     ...(detailVariant?.specAttributes || []).filter(
-      (item) => !pickAttribute(product.productAttributes, item.definition?.key || ''),
+      (item) =>
+        !pickAttribute(product.productAttributes, item.definition?.key || ""),
     ),
-  ]
-
-  const groupedSpecs = groupSpecsByDisplayGroup(mergedSpecs)
+  ];
 
   const resources = [
     ...(product.resources || []),
     ...(detailVariant?.downloads || []),
-  ].filter((item, index, all) => all.findIndex((other) => other._id === item._id) === index)
+  ].filter(
+    (item, index, all) =>
+      all.findIndex((other) => other._id === item._id) === index,
+  );
 
-  const hasModels = (product.availableModels || []).length > 0
-  const hasSpecs = groupedSpecs.length > 0
-  const hasResources = resources.length > 0
-  const hasHighlights = (product.iconHighlights || []).length > 0
-  const hasPerfectFor = (product.perfectFor || []).length > 0
-  const hasRelated = (product.relatedProducts || []).length > 0
+  const hasModels = (product.availableModels || []).length > 0;
+  const hasSpecs = mergedSpecs.length > 0;
+  const hasResources = resources.length > 0;
+  const hasHighlights = (product.iconHighlights || []).length > 0;
+  const hasPerfectFor = (product.perfectFor || []).length > 0;
+  const hasRelated = (product.relatedProducts || []).length > 0;
 
   const tabs = [
-    {key: 'models', label: 'Available models', visible: hasModels},
-    {key: 'specifications', label: 'Specifications', visible: hasSpecs},
-    {key: 'resources', label: 'Resources', visible: hasResources},
-    {key: 'highlights', label: 'Highlights', visible: hasHighlights},
-    {key: 'perfectFor', label: 'Perfect for', visible: hasPerfectFor},
-    {key: 'related', label: 'Related products', visible: hasRelated},
-  ].filter((tab) => tab.visible)
+    { key: "models", label: "Available models", visible: hasModels },
+    { key: "specifications", label: "Specifications", visible: hasSpecs },
+    { key: "resources", label: "Resources", visible: hasResources },
+    { key: "highlights", label: "Highlights", visible: hasHighlights },
+    { key: "perfectFor", label: "Perfect for", visible: hasPerfectFor },
+    { key: "related", label: "Related products", visible: hasRelated },
+  ].filter((tab) => tab.visible);
 
-  const requestedTab = toSingle(rawSearchParams.tab)
+  const requestedTab = toSingle(rawSearchParams.tab);
   const activeTab =
-    tabs.find((tab) => tab.key === requestedTab)?.key || tabs[0]?.key || 'specifications'
+    tabs.find((tab) => tab.key === requestedTab)?.key ||
+    tabs[0]?.key ||
+    "specifications";
 
-  const tabHref = (key: string) => `/products/${product.slug}?tab=${key}`
+  const galleryItems = (product.heroMedia || []).slice(0, 4);
+  const currentVisual =
+    detailVariant?.previewMedia?.[0] || product.heroMedia?.[0];
+  const currentImageUrl = mediaImageUrl(currentVisual, 1300);
+  const heroLabel = product.family || product.category || product.name;
 
   return (
-    <main className="page-wrap pdp-page">
-      <section className="pdp-hero">
-        <div className="meta pdp-breadcrumb">
-          <Link href="/products">Products</Link> / {product.name}
+    <main className="page-wrap pb-14 md:pb-18 px-3 md:px-0">
+      <section>
+        <div className="mb-4 flex md:flex-row flex-col-reverse md:items-center justify-between md:gap-4 gap-2">
+          <h1 className="m-0 text-[24px] font-[500] md:font-[600] leading-[1.02] tracking-[-0.02em] text-[#111827] md:text-[72px]">
+            {heroLabel}
+          </h1>
+          <p className="m-0  md:text-[14px] text-[12px] text-[#374151] md:space-x-[12px] space-x-2 items-center">
+            <Link href="/" className="hover:text-[#111827]">
+              Home
+            </Link>{" "}
+            <span>/</span>
+            <Link href="/products" className="hover:text-[#111827]">
+              Products
+            </Link>
+            <span>/</span>
+            <span className="text-[#FB612E] font-[600]">{product.name}</span>
+          </p>
         </div>
 
-        <div className="pdp-hero-grid">
-          <div className="pdp-media-card">
-            <div className="product-visual pdp-hero-visual">
-              {heroImageUrl ? (
-                <img src={heroImageUrl} alt={product.name} />
-              ) : heroMedia?.videoUrl ? (
-                <div style={{padding: 20, textAlign: 'center'}}>
-                  <p className="meta">Video Preview</p>
-                  <a className="btn" href={heroMedia.videoUrl} target="_blank" rel="noreferrer">
-                    Open Video
-                  </a>
-                </div>
+        <div className="grid gap-6  md:grid-cols-[1.04fr_0.96fr] md:gap-16 md:mt-16">
+          <div>
+            <div className="aspect-16/10 overflow-hidden rounded-[8px] border border-[#eceef2] bg-[#f6f6f7]">
+              {currentImageUrl ? (
+                <img
+                  src={currentImageUrl}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                />
               ) : (
-                <div className="product-placeholder" />
+                <div className="product-placeholder h-full w-full" />
               )}
             </div>
+            {galleryItems.length > 1 ? (
+              <div className="mt-3 grid grid-cols-4 gap-2">
+                {galleryItems.map((item, index) => {
+                  const url = mediaImageUrl(item, 360);
+                  return (
+                    <div
+                      key={item._key || `${index}`}
+                      className="aspect-4/3 overflow-hidden rounded-[6px] border border-[#eceef2] bg-[#f6f6f7]"
+                    >
+                      {url ? (
+                        <img
+                          src={url}
+                          alt={`${product.name} preview ${index + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="product-placeholder h-full w-full" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
 
-          <div className="pdp-info-card">
-            {(product.listingBadgeText || product.variants.some((item) => item.isStocked)) && (
-              <span className="badge">{product.listingBadgeText || 'STANDARD'}</span>
+          <div className="flex flex-col justify-center space-y-[20px]">
+            {(product.listingBadgeText || detailVariant?.isStocked) && (
+              <div className="">
+                <span className="inline-flex min-h-[24px] items-center inline-block rounded-[8px] bg-[#FB612E1A] md:px-[16px] px-2 md:py-[7px] py-1.5  font-[500] md:font-semibold leading-none text-[#FB612E] text-[14px]">
+                  {product.listingBadgeText || "In Stock"}
+                </span>
+              </div>
             )}
-            <h1 className="pdp-title">{product.name}</h1>
-            {product.shortDescription && <p className="meta">{product.shortDescription}</p>}
-            {product.heroDescription && <p className="meta">{product.heroDescription}</p>}
+            <h2 className=" text-[20px]  font-[500] md:font-[600] leading-[1.04] tracking-[-0.02em] text-[#111827] md:text-[48px]">
+              {product.name}
+            </h2>
+            {product.shortDescription ? (
+              <p className="font-[400] text-[17px] leading-6 text-[#374151] md:text-[20px]">
+                {product.shortDescription}
+              </p>
+            ) : null}
+            {product.heroDescription ? (
+              <p className="font-[400] text-[17px] leading-6 text-[#374151] md:text-[20px]">
+                {product.heroDescription}
+              </p>
+            ) : null}
 
-            <div className="chip-wrap" style={{marginTop: 12}}>
-              {product.brand && <span className="chip">Brand: {product.brand}</span>}
-              {product.category && <span className="chip">Category: {product.category}</span>}
-              {product.family && <span className="chip">Family: {product.family}</span>}
-            </div>
-
-            <div className="cta-row">
-              <Link className="btn btn-primary" href={`/configurator/product/${product.slug}`}>
-                Open configurator
+            <div className="md:mt-5 mt-3">
+              <Link
+                className="inline-flex min-h-[46px] items-center justify-center rounded-[8px] bg-[#FB612E] md:px-[32px] px-4 md:py-[16px] py-3 w-full text-[16px] font-[600] !text-white transition-colors hover:bg-(--color-brand-orange-hover)"
+                href={`/configurator/product/${product.slug}`}
+              >
+                Product Configurator
               </Link>
             </div>
+
+            {/* <div className="mt-5 flex flex-wrap gap-2.5">
+              {product.brand ? (
+                <span className="rounded-[999px] border border-[#eceef2] bg-[#fafafa] px-3 py-1.5 text-[12px] text-[#4b5563]">
+                  Brand: {product.brand}
+                </span>
+              ) : null}
+              {product.category ? (
+                <span className="rounded-[999px] border border-[#eceef2] bg-[#fafafa] px-3 py-1.5 text-[12px] text-[#4b5563]">
+                  Category: {product.category}
+                </span>
+              ) : null}
+              {detailVariant?.sku ? (
+                <span className="rounded-[999px] border border-[#eceef2] bg-[#fafafa] px-3 py-1.5 text-[12px] text-[#4b5563]">
+                  SKU: {detailVariant.sku}
+                </span>
+              ) : null}
+            </div> */}
           </div>
         </div>
       </section>
 
-      <section className="section pdp-section">
-        {tabs.length === 0 ? (
-          <p className="meta">No additional product details configured yet.</p>
-        ) : (
-          <>
-            <div className="pdp-tab-row chip-wrap">
+      <section className="mt-20">
+        {tabs.length > 0 ? (
+          <div className="flex">
+            <div className="flex  flex-nowrap items-center overflow-x-auto rounded-[8px] bg-[#FAFAFA] [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
               {tabs.map((tab) => (
                 <Link
                   key={tab.key}
-                  href={tabHref(tab.key)}
+                  href={tabHref(product.slug, tab.key)}
                   scroll={false}
-                  className={`chip ${activeTab === tab.key ? 'chip-active' : ''}`}
+                  className={`inline-flex md:min-h-[42px] min-h-[36px] shrink-0 items-center rounded-[6px] md:px-4 px-[12px] text-[14px] font-[600] transition-colors ${
+                    activeTab === tab.key
+                      ? "bg-(--color-brand-orange) !text-white"
+                      : "text-[#374151] hover:bg-white"
+                  }`}
                 >
                   {tab.label}
                 </Link>
               ))}
             </div>
+          </div>
+        ) : null}
 
-            <div className="pdp-tab-panel">
-          {activeTab === 'models' && (
+        <div className="mt-7">
+          {activeTab === "models" ? (
             <>
-              <h3>Available models</h3>
-              <div className="models-strip">
+              <h3 className="m-0 text-[20px] font-[500] md:font-[600] leading-[1.02] tracking-[-0.02em] text-[#111827] md:text-[28px]">
+                Available Models
+              </h3>
+              <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
                 {(product.availableModels || []).map((model) => {
-                  const modelImageUrl = sanityImageUrl(model.listingCardImage, 300)
-                  const isActive = model.slug === product.slug
+                  const modelImageUrl = sanityImageUrl(
+                    model.listingCardImage,
+                    360,
+                  );
+                  const isActive = model.slug === product.slug;
                   return (
                     <Link
                       href={`/products/${model.slug}`}
                       key={model._id}
-                      className={`model-card ${isActive ? 'active' : ''}`}
+                      className={`rounded-[8px] border p-2.5 transition-colors ${
+                        isActive
+                          ? "border-(--color-brand-orange) bg-[#fff7f3]"
+                          : "border-[#eceef2] hover:border-[#d7dbe2]"
+                      }`}
                     >
-                      <div className="product-visual" style={{aspectRatio: '16 / 10'}}>
-                        {modelImageUrl ? <img src={modelImageUrl} alt={model.name} /> : <div className="product-placeholder" />}
+                      <div className="aspect-16/11 overflow-hidden rounded-[6px] bg-[#f6f6f7]">
+                        {modelImageUrl ? (
+                          <img
+                            src={modelImageUrl}
+                            alt={model.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="product-placeholder h-full w-full" />
+                        )}
                       </div>
-                      <p className="product-name">{model.name}</p>
+                      <p className="m-0 mt-2 text-[14px] font-medium text-[#111827]">
+                        {model.name}
+                      </p>
                     </Link>
-                  )
+                  );
                 })}
               </div>
             </>
-          )}
+          ) : null}
 
-          {activeTab === 'specifications' && (
-            <>
-              <h3>Specifications</h3>
-              {groupedSpecs.length === 0 ? (
-                <p className="meta">No specifications configured yet.</p>
-              ) : (
-                groupedSpecs.map((group) => (
-                  <div key={group.group} className="group-block">
-                    <h4 className="group-title">{group.group}</h4>
-                    <div className="spec-grid">
-                      {group.items.map((item) => (
-                        <div key={`${group.group}-${item.label}`} className="spec-item">
-                          <small>{item.label}</small>
-                          <strong>{item.value}</strong>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              )}
-            </>
-          )}
+          {activeTab === "specifications" ? (
+            <ProductSpecificationsTab attributes={mergedSpecs} />
+          ) : null}
 
-          {activeTab === 'resources' && (
-            <>
-              <h3>Resources</h3>
-              {resources.length === 0 ? (
-                <p className="meta">No resources published yet.</p>
-              ) : (
-                <div className="resources-grid">
-                  {resources.map((resource) => (
-                    <a
-                      key={resource._id}
-                      className="resource-card"
-                      href={resource.externalUrl || '#'}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <div className="resource-type">{resource.type.toUpperCase()}</div>
-                      <p className="product-name">{resource.title}</p>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+          {activeTab === "resources" ? (
+            <ProductResourcesTab resources={resources} />
+          ) : null}
 
-          {activeTab === 'highlights' && (
+          {activeTab === "highlights" ? (
             <>
-              <h3>Highlights</h3>
-              <div className="highlight-grid">
+              <h3 className="m-0 text-[28px] font-semibold tracking-[-0.02em] text-[#111827]">
+                Highlights
+              </h3>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
                 {(product.iconHighlights || []).map((highlight) => (
-                  <article key={highlight._key} className="highlight-card">
-                    <p className="product-name">{highlight.title}</p>
-                    {highlight.description && <p className="meta">{highlight.description}</p>}
+                  <article
+                    key={highlight._key}
+                    className="rounded-[8px] border border-[#eceef2] bg-white p-4"
+                  >
+                    <p className="m-0 text-[18px] font-semibold leading-tight text-[#111827]">
+                      {highlight.title}
+                    </p>
+                    {highlight.description ? (
+                      <p className="m-0 mt-2 text-[14px] leading-6 text-[#4b5563]">
+                        {highlight.description}
+                      </p>
+                    ) : null}
                   </article>
                 ))}
               </div>
             </>
-          )}
+          ) : null}
 
-          {activeTab === 'perfectFor' && (
+          {activeTab === "perfectFor" ? (
             <>
-              <h3>Perfect for</h3>
-              <div className="perfect-grid">
+              <h3 className="m-0 text-[28px] font-semibold tracking-[-0.02em] text-[#111827]">
+                Perfect For
+              </h3>
+              <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {(product.perfectFor || []).map((item) => {
-                  const imageUrl = sanityImageUrl(item.image, 450)
+                  const imageUrl = sanityImageUrl(item.image, 450);
 
                   return (
-                    <article key={item._id} className="perfect-card">
-                      <div className="product-visual" style={{aspectRatio: '16 / 11'}}>
-                        {imageUrl ? <img src={imageUrl} alt={item.title} /> : <div className="product-placeholder" />}
+                    <article
+                      key={item._id}
+                      className="overflow-hidden rounded-[8px] border border-[#eceef2] bg-white"
+                    >
+                      <div className="aspect-16/11 bg-[#f6f6f7]">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={item.title}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="product-placeholder h-full w-full" />
+                        )}
                       </div>
-                      <p className="product-name">{item.title}</p>
-                      {item.description && <p className="meta">{item.description}</p>}
+                      <div className="p-3.5">
+                        <p className="m-0 text-[17px] font-semibold text-[#111827]">
+                          {item.title}
+                        </p>
+                        {item.description ? (
+                          <p className="m-0 mt-2 text-[14px] leading-6 text-[#4b5563]">
+                            {item.description}
+                          </p>
+                        ) : null}
+                      </div>
                     </article>
-                  )
+                  );
                 })}
               </div>
             </>
-          )}
+          ) : null}
 
-            {activeTab === 'related' && (
-              <>
-                <h3>Related products</h3>
-                <div className="related-grid">
-                  {(product.relatedProducts || []).map((related) => {
-                    const imageUrl = sanityImageUrl(related.listingCardImage, 420)
-
-                    return (
-                      <Link key={related._id} href={`/products/${related.slug}`} className="related-card">
-                        <div className="product-visual" style={{aspectRatio: '16 / 11'}}>
-                          {imageUrl ? <img src={imageUrl} alt={related.name} /> : <div className="product-placeholder" />}
-                        </div>
-                        {related.listingBadgeText && <span className="badge">{related.listingBadgeText}</span>}
-                        <p className="product-name">{related.name}</p>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </>
-            )}
-            </div>
-          </>
-        )}
+          {activeTab === "related" ? (
+            <RelatedProductsSection product={product} />
+          ) : null}
+        </div>
       </section>
+
+      <ProductFeatureSections product={product} />
+      {activeTab !== "related" ? (
+        <RelatedProductsSection product={product} />
+      ) : null}
     </main>
-  )
+  );
 }

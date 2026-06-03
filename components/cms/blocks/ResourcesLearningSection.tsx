@@ -2,7 +2,7 @@ import { CmsButtonsRow } from "@/components/cms/CmsButtons";
 import type { CmsBlockProps } from "@/components/cms/types";
 
 const resourcesSectionClassName =
-  "cms-resources-learning-section mx-auto grid w-[min(1380px,calc(100%_-_30px))] grid-cols-1 items-start gap-5 py-10 text-center md:gap-8 md:py-16 lg:grid-cols-[minmax(280px,0.76fr)_minmax(420px,1fr)] lg:gap-20 lg:text-left xl:gap-32";
+  "cms-resources-learning-section cms-section-width grid grid-cols-1 items-start gap-5 py-10 text-center md:gap-8 md:py-16 lg:grid-cols-[minmax(280px,0.76fr)_minmax(420px,1fr)] lg:gap-20 lg:text-left xl:gap-32";
 
 const resourcesHeadingWrapClassName = "min-w-0";
 

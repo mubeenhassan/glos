@@ -3,7 +3,7 @@ import type { CmsBlockProps } from "@/components/cms/types";
 import { cleanOptionalText, cx } from "@/components/cms/utils";
 
 const ctaBannerSectionBaseClassName =
-  "cms-cta-banner-section mx-auto flex w-[calc(100%_-_36px)] flex-col items-center gap-4 overflow-hidden rounded-[8px] px-6 py-10 text-center md:w-[calc(100%_-_60px)] md:gap-5 md:px-12 md:py-20 lg:w-[min(1680px,calc(100%_-_80px))] mb-16 md:mb-20";
+  "cms-cta-banner-section cms-section-width flex flex-col items-center gap-4 overflow-hidden rounded-[8px] px-6 py-10 text-center md:gap-5 md:px-12 md:py-20 mb-16 md:mb-20";
 
 export default function CtaBannerBlockSection({
   block,

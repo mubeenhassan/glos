@@ -5,7 +5,7 @@ import type { CmsBlockProps } from "@/components/cms/types";
 import { cx } from "@/components/cms/utils";
 
 const gallerySectionClassName =
-  "cms-gallery-section mx-auto grid w-[min(1380px,calc(100%_-_30px))] gap-7 pb-6 md:gap-12 lg:gap-16";
+  "cms-gallery-section cms-section-width grid gap-7 pb-6 md:gap-12 lg:gap-16";
 
 const galleryHeadingClassName =
   "mx-auto m-0 w-full max-w-5xl overflow-hidden text-center text-3xl leading-tight tracking-normal text-[#121827] font-[600] md:text-5xl lg:text-6xl";

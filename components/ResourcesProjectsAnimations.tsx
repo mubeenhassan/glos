@@ -21,12 +21,16 @@ export default function ResourcesProjectsAnimations() {
     }
 
     const resourcesSections = gsap.utils.toArray<HTMLElement>('.cms-resources-learning-section')
+    const downloadsSections = gsap.utils.toArray<HTMLElement>('.cms-resources-downloads-section')
+    const faqSections = gsap.utils.toArray<HTMLElement>('.cms-faq-section')
     const projectSections = gsap.utils.toArray<HTMLElement>('.cms-featured-projects-section')
     const statsSections = gsap.utils.toArray<HTMLElement>('.cms-stats-section')
     const ctaSections = gsap.utils.toArray<HTMLElement>('.cms-cta-banner-section')
 
     if (
       resourcesSections.length === 0 &&
+      downloadsSections.length === 0 &&
+      faqSections.length === 0 &&
       projectSections.length === 0 &&
       statsSections.length === 0 &&
       ctaSections.length === 0
@@ -69,6 +73,96 @@ export default function ResourcesProjectsAnimations() {
 
         if (copyItems.length > 0) {
           reveal.to(copyItems, {autoAlpha: 1, y: 0, duration: 0.82, stagger: 0.12}, 0.22)
+        }
+      })
+
+      downloadsSections.forEach((section) => {
+        const tabList = section.querySelector<HTMLElement>('[role="tablist"]')
+        const tabs = gsap.utils.toArray<HTMLElement>('[role="tab"]', section)
+        const cards = gsap.utils.toArray<HTMLElement>('article', section)
+        const emptyMessage = section.querySelector<HTMLElement>('p')
+
+        gsap.set(compactElements([tabList, emptyMessage]), {autoAlpha: 0, y: 20})
+        gsap.set(tabs, {autoAlpha: 0, y: 14})
+        gsap.set(cards, {
+          autoAlpha: 0,
+          y: 28,
+          scale: 0.97,
+          clipPath: 'inset(10% 10% 10% 10% round 8px)',
+        })
+
+        const reveal = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 80%',
+            once: true,
+          },
+          defaults: {ease: 'power3.out'},
+        })
+
+        if (tabList) {
+          reveal.to(tabList, {autoAlpha: 1, y: 0, duration: 0.66}, 0)
+        }
+
+        if (tabs.length > 0) {
+          reveal.to(tabs, {autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.04}, 0.08)
+        }
+
+        if (cards.length > 0) {
+          reveal.to(
+            cards,
+            {
+              autoAlpha: 1,
+              y: 0,
+              scale: 1,
+              clipPath: 'inset(0% 0% 0% 0% round 8px)',
+              duration: 0.95,
+              stagger: {amount: 0.34, from: 'start'},
+              ease: 'expo.out',
+            },
+            0.16,
+          )
+        } else if (emptyMessage) {
+          reveal.to(emptyMessage, {autoAlpha: 1, y: 0, duration: 0.65}, 0.16)
+        }
+      })
+
+      faqSections.forEach((section) => {
+        const title = section.querySelector<HTMLElement>('h2')
+        const items = gsap.utils.toArray<HTMLElement>('li', section)
+
+        gsap.set(compactElements([title]), {autoAlpha: 0, y: 26})
+        gsap.set(items, {
+          autoAlpha: 0,
+          y: 20,
+          scale: 0.98,
+        })
+
+        const reveal = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 82%',
+            once: true,
+          },
+          defaults: {ease: 'power3.out'},
+        })
+
+        if (title) {
+          reveal.to(title, {autoAlpha: 1, y: 0, duration: 0.78}, 0)
+        }
+
+        if (items.length > 0) {
+          reveal.to(
+            items,
+            {
+              autoAlpha: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.72,
+              stagger: 0.1,
+            },
+            0.14,
+          )
         }
       })
 

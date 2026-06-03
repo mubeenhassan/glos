@@ -13,7 +13,7 @@ export default async function HomePage({
 
   if (!page) {
     return (
-      <main className="mx-auto my-6 w-[min(1380px,calc(100%_-_30px))] flex-1">
+      <main className="cms-section-width my-6 flex-1">
         <section className="rounded-[18px] border border-[var(--line)] bg-gradient-to-br from-white to-[#f7f8fb] p-6 shadow-[var(--shadow-soft)] md:p-9">
           <h1 className="m-0 mb-3 font-[var(--font-display)] text-3xl font-semibold leading-tight tracking-[-0.03em] md:text-5xl">
             Home page is not published yet

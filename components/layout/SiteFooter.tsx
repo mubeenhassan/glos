@@ -207,7 +207,7 @@ export default function SiteFooter({ siteSettings }: SiteFooterProps) {
 
   return (
     <footer className="footer ">
-      <div className="footer-inner max-w-[1280px] mx-auto !px-2">
+      <div className="footer-inner cms-section-width !px-2">
         <div className={`footer-grid ${showBrandColumn ? "" : " no-brand"}`}>
           {showBrandColumn ? (
             <div className="footer-brand-col">

@@ -2,6 +2,10 @@
 
 import {useEffect, useState} from 'react'
 import Link from 'next/link'
+import {createPortal} from 'react-dom'
+
+const CLOSE_MOBILE_MENU_EVENT = 'glos:close-mobile-menu'
+const CLOSE_MOBILE_FILTERS_EVENT = 'glos:close-mobile-filters'
 
 export type MobileLink = {
   label: string
@@ -18,6 +22,11 @@ type Props = {
 
 export default function MobileMenuClient({links, siteName, logoUrl}: Props) {
   const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
@@ -25,6 +34,17 @@ export default function MobileMenuClient({links, siteName, logoUrl}: Props) {
       document.body.style.overflow = ''
     }
   }, [open])
+
+  useEffect(() => {
+    function handleCloseMenu() {
+      setOpen(false)
+    }
+
+    document.addEventListener(CLOSE_MOBILE_MENU_EVENT, handleCloseMenu)
+    return () => {
+      document.removeEventListener(CLOSE_MOBILE_MENU_EVENT, handleCloseMenu)
+    }
+  }, [])
 
   if (links.length === 0) return null
 
@@ -35,7 +55,10 @@ export default function MobileMenuClient({links, siteName, logoUrl}: Props) {
       {/* Hamburger button — mobile only */}
       <button
         className="mobile-hamburger flex md:hidden"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          document.dispatchEvent(new Event(CLOSE_MOBILE_FILTERS_EVENT))
+          setOpen(true)
+        }}
         aria-label="Open navigation menu"
         aria-expanded={open}
         aria-controls="mobile-menu-overlay"
@@ -47,7 +70,8 @@ export default function MobileMenuClient({links, siteName, logoUrl}: Props) {
       </button>
 
       {/* Full-screen overlay */}
-      {open && (
+      {mounted && open
+        ? createPortal(
         <div
           id="mobile-menu-overlay"
           className="mobile-menu"
@@ -110,8 +134,10 @@ export default function MobileMenuClient({links, siteName, logoUrl}: Props) {
             <span className="mobile-menu-foot-bar" aria-hidden="true" />
             {siteName && <span className="mobile-menu-foot-name">{siteName}</span>}
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )
+        : null}
     </>
   )
 }
