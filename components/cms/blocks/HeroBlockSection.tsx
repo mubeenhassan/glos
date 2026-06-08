@@ -17,7 +17,7 @@ const heroOverlayClassName =
   "absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.3)_45%,rgba(0,0,0,0.22)_100%),linear-gradient(180deg,rgba(0,0,0,0.26)_0%,rgba(0,0,0,0.08)_42%,rgba(0,0,0,0.42)_100%)]";
 
 const heroContentBaseClassName =
-  "cms-hero-content max-w-[1420px] mx-auto relative z-[2] grid md:min-h-[344px] w-full min-w-0 grid-cols-1 items-center justify-center md:items-start gap-6 text-left md:min-h-[360px] lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.7fr)] lg:items-end lg:gap-11 xl:min-h-[calc(clamp(610px,72vh,940px)_-_clamp(150px,16vh,218px)_-_clamp(64px,9vh,122px))] xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.54fr)] xl:gap-[clamp(32px,7vw,136px)] ";
+  "cms-hero-content max-w-[1380px] mx-auto relative z-[2] grid md:min-h-[344px] w-full min-w-0 grid-cols-1 items-center justify-center md:items-start gap-6 text-left md:min-h-[360px] lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.7fr)] lg:items-end lg:gap-11 xl:min-h-[calc(clamp(610px,72vh,940px)_-_clamp(150px,16vh,218px)_-_clamp(64px,9vh,122px))] xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.54fr)] xl:gap-[clamp(32px,7vw,136px)] ";
 
 const heroContentAlignmentClassNames = {
   left: "",

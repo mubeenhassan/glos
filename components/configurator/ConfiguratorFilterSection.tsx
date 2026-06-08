@@ -9,7 +9,6 @@ import {
 } from '@/lib/configuratorFilters'
 import {
   colourTemperatureSwatchColor,
-  finishSwatchColor,
   getConfiguratorChipGridClass,
   getConfiguratorFilterLayout,
   splitModelOptionLabel,
@@ -37,36 +36,6 @@ type ConfiguratorFilterSectionProps = {
     selectedMax: number
     step: number
   }
-}
-
-function FinishFixtureIcon({label}: {label: string}) {
-  return (
-    <div
-      className="mx-auto grid h-10 w-10 place-items-center rounded-full border border-black/5"
-      style={{backgroundColor: finishSwatchColor(label)}}
-      aria-hidden="true"
-    >
-      <div className="h-4 w-4 rounded-full bg-white/70" />
-    </div>
-  )
-}
-
-function ModelFixtureIcon() {
-  return (
-    <svg viewBox="0 0 40 40" className="h-10 w-10" aria-hidden="true">
-      <circle cx="20" cy="20" r="11" fill="#d9dce2" />
-      <circle cx="20" cy="20" r="5.5" fill="#f4f5f7" />
-    </svg>
-  )
-}
-
-function AccessoryFixtureIcon() {
-  return (
-    <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
-      <rect x="6" y="10" width="20" height="12" rx="2" fill="#d9dce2" />
-      <path d="M10 14h12M10 18h8" stroke="#f7f7f8" strokeWidth="1.5" />
-    </svg>
-  )
 }
 
 function FilterOptionLink({
@@ -114,14 +83,14 @@ function chipOptionClass(active: boolean, disabled?: boolean) {
 
 function cardOptionClass(active: boolean, disabled?: boolean) {
   return cx(
-    'grid min-h-[104px] content-center justify-items-center gap-1.5 rounded-lg border border-black/10 bg-white px-2 py-3 text-center text-sm leading-5 text-[#374151] transition-colors hover:border-black/20',
+    'grid min-h-[72px] content-center justify-items-center gap-1 rounded-lg border border-black/10 bg-white px-2 py-3 text-center text-sm leading-5 text-[#374151] transition-colors hover:border-black/20',
     optionActiveClass(active, disabled),
   )
 }
 
 function finishCardClass(active: boolean, disabled?: boolean) {
   return cx(
-    'grid min-h-[96px] content-end justify-items-center gap-2 rounded-lg border border-black/10 bg-white px-2 py-2.5 text-center text-sm leading-5 text-[#374151] transition-colors hover:border-black/20',
+    'grid min-h-[72px] content-center justify-items-center gap-1 rounded-lg border border-black/10 bg-white px-2 py-2.5 text-center text-sm leading-5 text-[#374151] transition-colors hover:border-black/20',
     optionActiveClass(active, disabled),
   )
 }
@@ -150,7 +119,32 @@ export default function ConfiguratorFilterSection({
       <h5 className="m-0 text-sm font-bold leading-5 text-[#111827]">{definition.title}</h5>
 
       {layout === 'range' ? (
-        lockFiltersToSelectedSku ? (
+        lockFiltersToSelectedSku && numericMeta ? (
+          <div className="filter-range filter-range-live pointer-events-none opacity-100">
+            <div className="filter-range-track">
+              <span className="filter-range-line" />
+              <span
+                className="filter-range-fill"
+                style={{
+                  left: `${((numericMeta.selectedMin - numericMeta.minBound) / Math.max(numericMeta.maxBound - numericMeta.minBound, numericMeta.step)) * 100}%`,
+                  width: `${((numericMeta.selectedMax - numericMeta.selectedMin) / Math.max(numericMeta.maxBound - numericMeta.minBound, numericMeta.step)) * 100}%`,
+                }}
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between text-sm leading-5 text-[#374151]">
+              <span className="font-semibold text-[#111827]">
+                {numericMeta.selectedMin}
+                {definition.unit ? ` ${definition.unit}` : ''}
+              </span>
+              {numericMeta.selectedMin !== numericMeta.selectedMax ? (
+                <span className="font-semibold text-[#111827]">
+                  {numericMeta.selectedMax}
+                  {definition.unit ? ` ${definition.unit}` : ''}
+                </span>
+              ) : null}
+            </div>
+          </div>
+        ) : lockFiltersToSelectedSku ? (
           <p className="m-0 text-sm leading-5 text-[#6b7280]">Locked to selected product code.</p>
         ) : numericMeta ? (
           <NumericRangeFilter
@@ -189,7 +183,6 @@ export default function ConfiguratorFilterSection({
                 disabled={isDisabled}
                 className={finishCardClass(active, isDisabled)}
               >
-                <FinishFixtureIcon label={option.label} />
                 <span>{option.label}</span>
               </FilterOptionLink>
             )
@@ -248,7 +241,6 @@ export default function ConfiguratorFilterSection({
                 disabled={isDisabled}
                 className={cardOptionClass(active, isDisabled)}
               >
-                <ModelFixtureIcon />
                 <span className="font-semibold text-[#111827]">{primary}</span>
                 {secondary ? (
                   <span className="text-xs leading-4 text-[#6b7280]">{secondary}</span>
@@ -278,7 +270,6 @@ export default function ConfiguratorFilterSection({
                 disabled={isDisabled}
                 className={finishCardClass(active, isDisabled)}
               >
-                <AccessoryFixtureIcon />
                 <span className="text-xs leading-4">{option.label}</span>
               </FilterOptionLink>
             )

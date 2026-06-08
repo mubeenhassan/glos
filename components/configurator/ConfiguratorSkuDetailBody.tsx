@@ -50,7 +50,7 @@ function SpecSection({
   emptyMessage: string
 }) {
   return (
-    <article>
+    <article className="cfg-sku-spec-section">
       <h3 className="m-0 mb-3 text-[14px] font-bold text-[#111827]">{title}</h3>
       {rows.length === 0 ? (
         <p className="meta text-xs">{emptyMessage}</p>
@@ -77,9 +77,9 @@ type ConfiguratorSkuDetailBodyProps = {
 
 export default function ConfiguratorSkuDetailBody({detail}: ConfiguratorSkuDetailBodyProps) {
   return (
-    <div className="grid grid-cols-1 gap-5 min-[900px]:grid-cols-3 min-[900px]:gap-6">
-      <div className="grid gap-3 min-[900px]:gap-[10px]">
-        <article className="border-b border-[#eceef2] pb-4 min-[900px]:border-b-0 min-[900px]:pb-0">
+    <div className="cfg-sku-panel-body grid grid-cols-1 gap-5 min-[900px]:grid-cols-3 min-[900px]:gap-6">
+      <div className="cfg-sku-spec-section grid gap-3 min-[900px]:gap-[10px]">
+        <article className="cfg-sku-spec-section border-b border-[#eceef2] pb-4 min-[900px]:border-b-0 min-[900px]:pb-0">
           <h3 className="m-0 mb-2.5 text-[14px] font-[700] text-[#111827]">Key Product Info</h3>
           {detail.keyInfoItems.length === 0 ? (
             <p className="meta text-xs">No key product info available.</p>
@@ -118,7 +118,7 @@ export default function ConfiguratorSkuDetailBody({detail}: ConfiguratorSkuDetai
         />
       </div>
 
-      <div className="grid gap-5 min-[900px]:gap-[22px]">
+      <div className="cfg-sku-spec-section grid gap-5 min-[900px]:gap-[22px]">
         <SpecSection
           title="Performance Specifications"
           rows={detail.performanceRows}
@@ -126,7 +126,7 @@ export default function ConfiguratorSkuDetailBody({detail}: ConfiguratorSkuDetai
         />
       </div>
 
-      <div className="grid gap-5 min-[900px]:gap-[22px]">
+      <div className="cfg-sku-spec-section grid gap-5 min-[900px]:gap-[22px]">
         <SpecSection title="Driver" rows={detail.driverRows} emptyMessage="No driver rows available." />
         <SpecSection
           title="Installation Specifications"

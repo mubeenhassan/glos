@@ -17,8 +17,9 @@ import {
 import { mediaImageUrl, sanityImageUrl, valueToToken } from "@/lib/sanity";
 import ConfiguratorFilterPanel from "@/components/configurator/ConfiguratorFilterPanel";
 import ConfiguratorMobileFiltersSheet from "@/components/configurator/ConfiguratorMobileFiltersSheet";
-import ConfiguratorSkuDetailModal from "@/components/configurator/ConfiguratorSkuDetailModal";
+import ConfiguratorSkuDetailPanel from "@/components/configurator/ConfiguratorSkuDetailPanel";
 import ConfiguratorVariantCard from "@/components/configurator/ConfiguratorVariantCard";
+import ConfiguratorPageAnimations from "@/components/configurator/ConfiguratorPageAnimations";
 import { buildSkuDetailPayload } from "@/lib/configuratorSkuDetail";
 
 function formatNumericFilterLabel(value: number, unit?: string) {
@@ -118,10 +119,88 @@ function toValueTokens(
   }
 
   if (typeof value.numberValue === "number") {
-    return [String(value.numberValue)];
+    return [formatNumericParamValue(value.numberValue)];
   }
 
   return [];
+}
+
+function getVariantAttribute(variant: ProductVariant, key: string) {
+  return (
+    pickAttribute(variant.configSelections, key) ||
+    pickAttribute(variant.specAttributes, key)
+  );
+}
+
+type FilterOptionLike = {
+  label: string;
+  value: string;
+};
+
+function resolveFilterTokensFromAttribute(
+  attribute: ProductVariant["specAttributes"][number],
+  definition: AttributeDefinition,
+  options: FilterOptionLike[],
+) {
+  if (
+    definition.valueType === "number" &&
+    typeof attribute.numberValue === "number"
+  ) {
+    const numericToken = formatNumericParamValue(attribute.numberValue);
+    const matchedOption = options.find(
+      (option) => option.value === numericToken,
+    );
+    return [matchedOption?.value ?? numericToken];
+  }
+
+  if (attribute.singleOptionValue) {
+    const selected = attribute.singleOptionValue;
+    const matchedOption = options.find(
+      (option) =>
+        valueToToken(option.value) === valueToToken(selected.value) ||
+        valueToToken(option.label) === valueToToken(selected.label) ||
+        valueToToken(option.label) === valueToToken(selected.value),
+    );
+
+    if (matchedOption) {
+      return [valueToToken(matchedOption.value)];
+    }
+  }
+
+  if (attribute.multiOptionValues?.length) {
+    const tokens = attribute.multiOptionValues.flatMap((selected) => {
+      const matchedOption = options.find(
+        (option) =>
+          valueToToken(option.value) === valueToToken(selected.value) ||
+          valueToToken(option.label) === valueToToken(selected.label),
+      );
+
+      return matchedOption
+        ? [valueToToken(matchedOption.value)]
+        : [valueToToken(selected.value)];
+    });
+
+    return Array.from(new Set(tokens));
+  }
+
+  return toValueTokens(attribute);
+}
+
+function getVariantFilterTokens(
+  variant: ProductVariant | undefined,
+  definition: AttributeDefinition,
+  options: FilterOptionLike[] = [],
+) {
+  if (!variant) {
+    return [];
+  }
+
+  const attribute = getVariantAttribute(variant, definition.key);
+  if (!attribute) {
+    return [];
+  }
+
+  return resolveFilterTokensFromAttribute(attribute, definition, options);
 }
 
 export default async function ConfiguratorPage({
@@ -152,6 +231,20 @@ export default async function ConfiguratorPage({
   const defaultVisibleColumns = dedupeDefinitions(config.defaultVisibleColumns);
 
   const urlParams = asSearchParamsObject(rawSearch);
+
+  const requestedSkuId = toSingle(rawSearch.skuId);
+  const normalizedRequestedSkuId = requestedSkuId
+    ? valueToToken(requestedSkuId)
+    : undefined;
+
+  const selectedVariantBySku =
+    (requestedSkuId
+      ? product.variants.find(
+          (variant) =>
+            variant._id === requestedSkuId ||
+            valueToToken(variant.sku) === normalizedRequestedSkuId,
+        )
+      : undefined) ?? undefined;
 
   const numericFilterMetaByDefinitionKey = new Map<
     string,
@@ -247,32 +340,53 @@ export default async function ConfiguratorPage({
 
   const stockedOnly = toSingle(rawSearch.stocked) === "1";
   const skuQuery = toSingle(rawSearch.q) || "";
-  const requestedSkuId = toSingle(rawSearch.skuId);
-  const normalizedRequestedSkuId = requestedSkuId
-    ? valueToToken(requestedSkuId)
-    : undefined;
 
-  const selectedVariantBySku =
-    (requestedSkuId
-      ? product.variants.find(
-          (variant) =>
-            variant._id === requestedSkuId ||
-            valueToToken(variant.sku) === normalizedRequestedSkuId,
-        )
-      : undefined) ?? undefined;
+  const optionsByDefinition = new Map<string, typeof options>();
+  options.forEach((option) => {
+    const existing = optionsByDefinition.get(option.definitionRef) ?? [];
+    existing.push(option);
+    optionsByDefinition.set(option.definitionRef, existing);
+  });
+
+  if (selectedVariantBySku) {
+    filterDefinitions
+      .filter((definition) => definition.valueType === "number")
+      .forEach((definition) => {
+        const attribute = getVariantAttribute(
+          selectedVariantBySku,
+          definition.key,
+        );
+
+        if (typeof attribute?.numberValue !== "number") {
+          return;
+        }
+
+        const meta = numericFilterMetaByDefinitionKey.get(definition.key);
+        if (!meta) {
+          return;
+        }
+
+        const value = attribute.numberValue;
+        numericFilterMetaByDefinitionKey.set(definition.key, {
+          ...meta,
+          selectedMin: value,
+          selectedMax: value,
+        });
+      });
+  }
 
   const lockedFiltersFromSku = filterDefinitions.reduce<
     Record<string, string[]>
   >((acc, definition) => {
-    const specValue = pickAttribute(
-      selectedVariantBySku?.specAttributes,
-      definition.key,
+    const definitionOptions =
+      definition.valueType === "number"
+        ? (numericFilterOptionsByDefinitionKey.get(definition.key) ?? [])
+        : (optionsByDefinition.get(definition._id) ?? []);
+    const tokens = getVariantFilterTokens(
+      selectedVariantBySku,
+      definition,
+      definitionOptions,
     );
-    const configValue = pickAttribute(
-      selectedVariantBySku?.configSelections,
-      definition.key,
-    );
-    const tokens = toValueTokens(specValue || configValue);
 
     if (tokens.length > 0) {
       acc[definition.key] = tokens;
@@ -296,45 +410,32 @@ export default async function ConfiguratorPage({
     ? sizeParam
     : config.defaultPageSize;
 
-  const filteredVariants = filterVariantsBySelections(
+  const listFilteredVariants = filterVariantsBySelections(
     product.variants,
-    activeFilters,
-    effectiveStockedOnly,
+    selectedFilters,
+    stockedOnly,
     skuQuery,
   );
 
   const page = Number(toSingle(rawSearch.page) || "1");
-  const totalPages = Math.max(1, Math.ceil(filteredVariants.length / pageSize));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(listFilteredVariants.length / pageSize),
+  );
   const safePage = Math.min(Math.max(page, 1), totalPages);
-  const pagedVariants = filteredVariants.slice(
+  const pagedVariants = listFilteredVariants.slice(
     (safePage - 1) * pageSize,
     safePage * pageSize,
   );
-
-  const optionsByDefinition = new Map<string, typeof options>();
-  options.forEach((option) => {
-    const existing = optionsByDefinition.get(option.definitionRef) ?? [];
-    existing.push(option);
-    optionsByDefinition.set(option.definitionRef, existing);
-  });
 
   const visibleColumns =
     defaultVisibleColumns.length > 0 ? defaultVisibleColumns : tableColumns;
   const nonSkuColumns = visibleColumns.filter((column) => column.key !== "sku");
 
-  const selectedVariant =
-    selectedVariantBySku ||
-    (requestedSkuId
-      ? filteredVariants.find(
-          (variant) =>
-            variant._id === requestedSkuId ||
-            valueToToken(variant.sku) === normalizedRequestedSkuId,
-        )
-      : undefined) ||
-    undefined;
+  const selectedVariant = selectedVariantBySku;
 
   const featuredVariant =
-    selectedVariant || pagedVariants[0] || filteredVariants[0];
+    selectedVariant || pagedVariants[0] || listFilteredVariants[0];
   const previewMedia =
     (featuredVariant?.previewMedia && featuredVariant.previewMedia.length > 0
       ? featuredVariant.previewMedia
@@ -348,7 +449,7 @@ export default async function ConfiguratorPage({
     stockedOnly ||
     Boolean(skuQuery) ||
     Boolean(requestedSkuId) ||
-    Object.values(activeFilters).some((values) => values.length > 0);
+    Object.values(selectedFilters).some((values) => values.length > 0);
 
   const stockedParams = new URLSearchParams(urlParams.toString());
   if (stockedOnly) {
@@ -410,14 +511,14 @@ export default async function ConfiguratorPage({
   };
 
   return (
-    <main className="w-full py-32 pt-40 max-[1260px]:py-20 max-[1260px]:pt-28">
+    <main className="configurator-page w-full py-32 pt-40 max-[1260px]:py-20 max-[1260px]:pt-28">
       <div className="cms-section-width grid gap-5 max-[1260px]:gap-6">
         <header className="mb-10 flex flex-col-reverse md:flex-row gap-3 max-[1260px]:mb-0 min-[1261px]:mb-10 min-[1261px]:flex-row min-[1261px]:flex-wrap min-[1261px]:items-end min-[1261px]:justify-between min-[1261px]:gap-4">
-          <h1 className="m-0 truncate text-[24px] md:text-[clamp(2rem,4vw,3.8rem)] font-[500] md:font-[600] leading-[1.02] tracking-[-0.03em] text-[#111827] max-[1260px]:text-[2rem]">
+          <h1 className="js-cfg-title m-0 truncate text-[24px] md:text-[clamp(2rem,4vw,3.8rem)] font-[500] md:font-[600] leading-[1.02] tracking-[-0.03em] text-[#111827] max-[1260px]:text-[2rem]">
             {product.name}
           </h1>
           <nav
-            className="flex flex-wrap items-center gap-1 md:gap-2 text-sm font-[400] text-[#6b7280] [&_a:hover]:text-(--color-brand-orange)"
+            className="js-cfg-breadcrumb flex flex-wrap items-center gap-1 md:gap-2 text-sm font-[400] text-[#6b7280] [&_a:hover]:text-(--color-brand-orange)"
             aria-label="Breadcrumb"
           >
             <Link href="/">Home</Link>
@@ -451,12 +552,12 @@ export default async function ConfiguratorPage({
 
         <div className="grid grid-cols-1 gap-6 min-[1261px]:grid-cols-[minmax(300px,360px)_minmax(0,1fr)] min-[1261px]:items-start min-[1261px]:gap-8">
           <section className="order-1 min-[1261px]:col-start-2 min-[1261px]:row-start-1">
-            <div className="w-full overflow-hidden rounded-lg">
+            <div className="js-cfg-preview w-full overflow-hidden rounded-lg">
               {previewUrl ? (
                 <img
                   src={previewUrl}
                   alt={featuredVariant?.sku || product.name}
-                  className="h-full max-h-[320px] w-full object-cover max-[1260px]:max-h-[240px]"
+                  className="js-cfg-preview-image h-full max-h-[320px] w-full object-cover max-[1260px]:max-h-[240px]"
                 />
               ) : (
                 <div className="product-placeholder min-h-[240px]" />
@@ -469,7 +570,7 @@ export default async function ConfiguratorPage({
                 return (
                   <span
                     key={index}
-                    className="grid h-[72px] w-[96px] shrink-0 overflow-hidden rounded-lg bg-white min-[1261px]:max-h-[162px] min-[1261px]:max-w-[226px] min-[1261px]:h-auto min-[1261px]:w-auto min-[1261px]:flex-1"
+                    className="js-cfg-preview-thumb grid h-[72px] w-[96px] shrink-0 overflow-hidden rounded-lg bg-white min-[1261px]:max-h-[162px] min-[1261px]:max-w-[226px] min-[1261px]:h-auto min-[1261px]:w-auto min-[1261px]:flex-1"
                   >
                     {thumb ? (
                       <img
@@ -486,7 +587,7 @@ export default async function ConfiguratorPage({
             </div>
           </section>
 
-          <div className="order-2 flex flex-col gap-6 min-[1261px]:col-start-1 min-[1261px]:row-start-1 min-[1261px]:row-span-2 min-[1261px]:gap-8 min-[1261px]:self-start min-[1261px]:sticky min-[1261px]:top-24">
+          <div className="js-cfg-sidebar order-2 flex flex-col gap-6 min-[1261px]:col-start-1 min-[1261px]:row-start-1 min-[1261px]:row-span-2 min-[1261px]:gap-8 min-[1261px]:self-start min-[1261px]:sticky min-[1261px]:top-24">
             <section>
               <div className="mb-4 flex items-start justify-between gap-3">
                 <h2 className="m-0 text-sm font-bold leading-5 text-[#111827]">
@@ -510,7 +611,7 @@ export default async function ConfiguratorPage({
                     <Link
                       key={item._id}
                       href={configuratorHref(item.slug, "")}
-                      className="w-[96px] shrink-0 overflow-hidden rounded-lg bg-[#fafafa]"
+                      className="js-cfg-collection-model w-[96px] shrink-0 overflow-hidden rounded-lg bg-[#fafafa]"
                     >
                       <div className="grid aspect-square place-items-center">
                         {modelImage ? (
@@ -545,81 +646,90 @@ export default async function ConfiguratorPage({
 
           <section className="order-4 flex min-h-[360px] flex-col gap-4 min-[1261px]:col-start-2 min-[1261px]:row-start-2">
             <h2 className="m-0 text-[18px] font-[700] leading-5 text-[#111827] min-[1261px]:hidden">
-              Available Products ({filteredVariants.length})
+              Available Products ({listFilteredVariants.length})
             </h2>
 
-            <div className="flex flex-col gap-3 min-[1261px]:gap-3">
-              {pagedVariants.length === 0 ? (
-                <div className="rounded-lg border border-[#eceef2] bg-white px-5 py-6">
-                  <span className="text-sm leading-5 text-[#6b7280]">
-                    No variants match these filters.
-                  </span>
-                </div>
-              ) : null}
-
-              {pagedVariants.map((variant) => {
-                const detailParams = new URLSearchParams(urlParams.toString());
-                detailParams.set("skuId", variant._id);
-                const detailHref = configuratorHref(
-                  product.slug,
-                  detailParams.toString(),
-                );
-
-                return (
-                  <ConfiguratorVariantCard
-                    key={variant._id}
-                    variant={variant}
-                    nonSkuColumns={nonSkuColumns}
-                    detailHref={detailHref}
-                    getColumnValue={getColumnValue}
+            <div className="cfg-sku-list-anchor">
+              <div className="cfg-sku-rows relative">
+                {skuDetail ? (
+                  <ConfiguratorSkuDetailPanel
+                    detail={skuDetail}
+                    closeHref={configuratorHref(
+                      product.slug,
+                      clearSkuParams.toString(),
+                    )}
                   />
-                );
-              })}
-            </div>
+                ) : null}
 
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
-              <p className="m-0 text-sm leading-5 text-[#6b7280]">
-                Page {safePage} of {totalPages}
-              </p>
+                <div className="js-cfg-variant-list flex flex-col gap-3 min-[1261px]:gap-3">
+                {pagedVariants.length === 0 ? (
+                  <div className="rounded-lg border border-[#eceef2] bg-white px-5 py-6">
+                    <span className="text-sm leading-5 text-[#6b7280]">
+                      No variants match these filters.
+                    </span>
+                  </div>
+                ) : null}
 
-              <div className="inline-flex gap-2">
-                {prevPageHref ? (
-                  <Link
-                    href={prevPageHref}
-                    scroll={false}
-                    className="inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] hover:border-[#d1d5db]"
-                  >
-                    Previous
-                  </Link>
-                ) : (
-                  <span className="pointer-events-none inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] opacity-45">
-                    Previous
-                  </span>
-                )}
-                {nextPageHref ? (
-                  <Link
-                    href={nextPageHref}
-                    scroll={false}
-                    className="inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] hover:border-[#d1d5db]"
-                  >
-                    Next
-                  </Link>
-                ) : (
-                  <span className="pointer-events-none inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] opacity-45">
-                    Next
-                  </span>
-                )}
+                {pagedVariants.map((variant) => {
+                  const detailParams = new URLSearchParams(urlParams.toString());
+                  detailParams.set("skuId", variant._id);
+                  const detailHref = configuratorHref(
+                    product.slug,
+                    detailParams.toString(),
+                  );
+
+                  return (
+                    <ConfiguratorVariantCard
+                      key={variant._id}
+                      variant={variant}
+                      nonSkuColumns={nonSkuColumns}
+                      detailHref={detailHref}
+                      getColumnValue={getColumnValue}
+                    />
+                  );
+                })}
+                </div>
+              </div>
+
+              <div className="js-cfg-pagination flex flex-wrap items-center justify-between gap-4 pt-1">
+                <p className="m-0 text-sm leading-5 text-[#6b7280]">
+                  Page {safePage} of {totalPages}
+                </p>
+
+                <div className="inline-flex gap-2">
+                  {prevPageHref ? (
+                    <Link
+                      href={prevPageHref}
+                      scroll={false}
+                      className="inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] hover:border-[#d1d5db]"
+                    >
+                      Previous
+                    </Link>
+                  ) : (
+                    <span className="pointer-events-none inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] opacity-45">
+                      Previous
+                    </span>
+                  )}
+                  {nextPageHref ? (
+                    <Link
+                      href={nextPageHref}
+                      scroll={false}
+                      className="inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] hover:border-[#d1d5db]"
+                    >
+                      Next
+                    </Link>
+                  ) : (
+                    <span className="pointer-events-none inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] opacity-45">
+                      Next
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </section>
         </div>
-
-        <ConfiguratorSkuDetailModal
-          isOpen={Boolean(requestedSkuId && skuDetail)}
-          closeHref={configuratorHref(product.slug, clearSkuParams.toString())}
-          detail={skuDetail}
-        />
       </div>
+      <ConfiguratorPageAnimations />
     </main>
   );
 }

@@ -7,6 +7,7 @@ import {
 import ProductListingCard from "@/components/products/ProductListingCard";
 import ProductSpecificationsTab from "@/components/products/ProductSpecificationsTab";
 import ProductResourcesTab from "@/components/products/ProductResourcesTab";
+import ProductDetailAnimations from "@/components/products/ProductDetailAnimations";
 import { mediaImageUrl, sanityImageUrl } from "@/lib/sanity";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -37,7 +38,7 @@ function ProductFeatureSections({ product }: { product: ProductDetail }) {
         return (
           <article
             key={block._key}
-            className={`grid items-center gap-6 md:grid-cols-2 md:gap-10 ${reverse ? "md:[&>*:first-child]:order-2" : ""}`}
+            className={`js-pdp-feature grid items-center gap-6 md:grid-cols-2 md:gap-10 ${reverse ? "md:[&>*:first-child]:order-2" : ""}`}
           >
             <div className="overflow-hidden rounded-[8px] border border-[#eceef2] bg-[#f7f7f8]">
               <div className="aspect-16/11">
@@ -45,7 +46,7 @@ function ProductFeatureSections({ product }: { product: ProductDetail }) {
                   <img
                     src={mediaUrl}
                     alt={block.title}
-                    className="h-full w-full object-cover"
+                    className="js-pdp-feature-image h-full w-full object-cover"
                   />
                 ) : (
                   <div className="product-placeholder h-full w-full" />
@@ -75,14 +76,15 @@ function RelatedProductsSection({ product }: { product: ProductDetail }) {
   }
 
   return (
-    <section className="mt-14">
-      <h2 className="m-0 text-[20px] font-semibold leading-none tracking-[-0.02em] text-[#111827] md:text-[36px]">
+    <section className="js-pdp-related mt-14">
+      <h2 className="js-pdp-related-heading m-0 text-[20px] font-semibold leading-none tracking-[-0.02em] text-[#111827] md:text-[36px]">
         Related Products
       </h2>
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
         {product.relatedProducts.map((related) => (
           <ProductListingCard
             key={related._id}
+            className="js-pdp-related-card"
             name={related.name}
             slug={related.slug}
             imageUrl={sanityImageUrl(related.listingCardImage, 620)}
@@ -172,13 +174,13 @@ export default async function ProductDetailPage({
   const heroLabel = product.family || product.category || product.name;
 
   return (
-    <main className="page-wrap pb-14 md:pb-18 px-3 md:px-0">
+    <main className="product-detail-page page-wrap pb-14 md:pb-18 px-3 md:px-0">
       <section>
         <div className="mb-4 flex md:flex-row flex-col-reverse md:items-center justify-between md:gap-4 gap-2">
-          <h1 className="m-0 text-[24px] font-[500] md:font-[600] leading-[1.02] tracking-[-0.02em] text-[#111827] md:text-[72px]">
+          <h1 className="js-pdp-hero-label m-0 text-[24px] font-[500] md:font-[600] leading-[1.02] tracking-[-0.02em] text-[#111827] md:text-[72px]">
             {heroLabel}
           </h1>
-          <p className="m-0  md:text-[14px] text-[12px] text-[#374151] md:space-x-[12px] space-x-2 items-center">
+          <p className="js-pdp-breadcrumb m-0  md:text-[14px] text-[12px] text-[#374151] md:space-x-[12px] space-x-2 items-center">
             <Link href="/" className="hover:text-[#111827]">
               Home
             </Link>{" "}
@@ -193,12 +195,12 @@ export default async function ProductDetailPage({
 
         <div className="grid gap-6  md:grid-cols-[1.04fr_0.96fr] md:gap-16 md:mt-16">
           <div>
-            <div className="aspect-16/10 overflow-hidden rounded-[8px] border border-[#eceef2] bg-[#f6f6f7]">
+            <div className="js-pdp-hero-media aspect-16/10 overflow-hidden rounded-[8px] border border-[#eceef2] bg-[#f6f6f7]">
               {currentImageUrl ? (
                 <img
                   src={currentImageUrl}
                   alt={product.name}
-                  className="h-full w-full object-cover"
+                  className="js-pdp-hero-image h-full w-full object-cover"
                 />
               ) : (
                 <div className="product-placeholder h-full w-full" />
@@ -211,7 +213,7 @@ export default async function ProductDetailPage({
                   return (
                     <div
                       key={item._key || `${index}`}
-                      className="aspect-4/3 overflow-hidden rounded-[6px] border border-[#eceef2] bg-[#f6f6f7]"
+                      className="js-pdp-thumb aspect-4/3 overflow-hidden rounded-[6px] border border-[#eceef2] bg-[#f6f6f7]"
                     >
                       {url ? (
                         <img
@@ -231,27 +233,27 @@ export default async function ProductDetailPage({
 
           <div className="flex flex-col justify-center space-y-[20px]">
             {(product.listingBadgeText || detailVariant?.isStocked) && (
-              <div className="">
+              <div className="js-pdp-intro-item">
                 <span className="inline-flex min-h-[24px] items-center inline-block rounded-[8px] bg-[#FB612E1A] md:px-[16px] px-2 md:py-[7px] py-1.5  font-[500] md:font-semibold leading-none text-[#FB612E] text-[14px]">
                   {product.listingBadgeText || "In Stock"}
                 </span>
               </div>
             )}
-            <h2 className=" text-[20px]  font-[500] md:font-[600] leading-[1.04] tracking-[-0.02em] text-[#111827] md:text-[48px]">
+            <h2 className="js-pdp-intro-item text-[20px]  font-[500] md:font-[600] leading-[1.04] tracking-[-0.02em] text-[#111827] md:text-[48px]">
               {product.name}
             </h2>
             {product.shortDescription ? (
-              <p className="font-[400] text-[17px] leading-6 text-[#374151] md:text-[20px]">
+              <p className="js-pdp-intro-item font-[400] text-[17px] leading-6 text-[#374151] md:text-[20px]">
                 {product.shortDescription}
               </p>
             ) : null}
             {product.heroDescription ? (
-              <p className="font-[400] text-[17px] leading-6 text-[#374151] md:text-[20px]">
+              <p className="js-pdp-intro-item font-[400] text-[17px] leading-6 text-[#374151] md:text-[20px]">
                 {product.heroDescription}
               </p>
             ) : null}
 
-            <div className="md:mt-5 mt-3">
+            <div className="js-pdp-intro-item md:mt-5 mt-3">
               <Link
                 className="inline-flex min-h-[46px] items-center justify-center rounded-[8px] bg-[#FB612E] md:px-[32px] px-4 md:py-[16px] py-3 w-full text-[16px] font-[600] !text-white transition-colors hover:bg-(--color-brand-orange-hover)"
                 href={`/configurator/product/${product.slug}`}
@@ -284,13 +286,13 @@ export default async function ProductDetailPage({
       <section className="mt-20">
         {tabs.length > 0 ? (
           <div className="flex">
-            <div className="flex  flex-nowrap items-center overflow-x-auto rounded-[8px] bg-[#FAFAFA] [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+            <div className="js-pdp-tabs flex  flex-nowrap items-center overflow-x-auto rounded-[8px] bg-[#FAFAFA] [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
               {tabs.map((tab) => (
                 <Link
                   key={tab.key}
                   href={tabHref(product.slug, tab.key)}
                   scroll={false}
-                  className={`inline-flex md:min-h-[42px] min-h-[36px] shrink-0 items-center rounded-[6px] md:px-4 px-[12px] text-[14px] font-[600] transition-colors ${
+                  className={`js-pdp-tab inline-flex md:min-h-[42px] min-h-[36px] shrink-0 items-center rounded-[6px] md:px-4 px-[12px] text-[14px] font-[600] transition-colors ${
                     activeTab === tab.key
                       ? "bg-(--color-brand-orange) !text-white"
                       : "text-[#374151] hover:bg-white"
@@ -303,7 +305,7 @@ export default async function ProductDetailPage({
           </div>
         ) : null}
 
-        <div className="mt-7">
+        <div className="js-pdp-tab-panel mt-7">
           {activeTab === "models" ? (
             <>
               <h3 className="m-0 text-[20px] font-[500] md:font-[600] leading-[1.02] tracking-[-0.02em] text-[#111827] md:text-[28px]">
@@ -432,6 +434,7 @@ export default async function ProductDetailPage({
       {activeTab !== "related" ? (
         <RelatedProductsSection product={product} />
       ) : null}
+      <ProductDetailAnimations />
     </main>
   );
 }
