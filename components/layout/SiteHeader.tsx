@@ -1,4 +1,3 @@
-import { SearchIcon } from "@sanity/icons";
 import Link from "next/link";
 import { mediaImageUrl } from "@/lib/sanity";
 import type { SiteSettings } from "@/lib/cms";
@@ -6,7 +5,8 @@ import { resolveNavigationHref } from "@/lib/navigation";
 import MobileMenuClient, {
   type MobileLink,
 } from "@/components/layout/MobileMenuClient";
-import NavigationLink from "./NavigationLink";
+import HeaderNav from "@/components/layout/HeaderNav";
+import HeaderSearch from "@/components/layout/HeaderSearch";
 import HeaderWrapper from "./HeaderWapper";
 type SiteHeaderProps = {
   siteSettings: SiteSettings | null;
@@ -27,17 +27,6 @@ const logoClassName = "brand-logo h-[32px] w-auto lg:h-[44px]";
 
 const brandPlaceholderClassName =
   "h-11 w-11 md:h-[52px] md:w-[52px] lg:h-[clamp(36px,4.2vw,62px)] lg:w-[clamp(36px,4.2vw,62px)]";
-
-// hidden on mobile, flex on desktop — keeps desktop layout identical
-const navClassName =
-  "top-nav col-span-2 row-start-2 hidden min-h-11 w-full flex-nowrap items-center justify-start gap-4  rounded-full  text-[#FFFFFF] px-4  transition-[background-color,border-color,color,box-shadow] duration-300 [scrollbar-width:thin] md:col-span-1 md:col-start-2 md:row-start-1 md:flex md:min-h-12 md:w-auto md:flex-wrap md:justify-center md:gap-5 md:justify-self-center md:px-6 lg:gap-7 relative border border-white/20 bg-white/[0.08] backdrop-blur-[15px] shadow-[0_0_48px_-12px_rgba(255,255,255,0.15)] relative overflow-hidden before:absolute before:inset-0 before:rounded-full before:shadow-[inset_1.22px_1.13px_4.62px_rgba(255,255,255,0.126)]  before:pointer-events-none";
-
-const navLinkClassName =
-  "top-nav-link relative whitespace-nowrap py-1.5 text-[16px] font-[400] text-current transition-opacity duration-200 after:absolute after:inset-x-0 after:bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:rounded-full after:bg-current after:transition-transform after:duration-200 hover:opacity-75 hover:after:scale-x-100 focus-visible:opacity-75 focus-visible:after:scale-x-100 md:text-[0.92rem]";
-
-// hidden on mobile, visible on desktop — keeps desktop identical
-const searchClassName =
-  "top-search hidden md:grid text-[30px]  rounded-full  p-2  place-items-center !text-white transition-[background-color,border-color,color,box-shadow] duration-300 hover:bg-white/20 hover:border-white/30 hover:shadow-[0_0_48px_-8px_rgba(255,255,255,0.2)] focus-visible:bg-white/20 focus-visible:border-white/30 focus-visible:shadow-[0_0_48px_-8px_rgba(255,255,255,0.2)]";
 
 const searchPlaceholderClassName =
   "top-search-placeholder hidden md:block row-start-1 h-10 w-10 justify-self-end";
@@ -109,56 +98,10 @@ export default function SiteHeader({ siteSettings }: SiteHeaderProps) {
 
         {/* Desktop nav — hidden on mobile, identical on desktop */}
 
-        {/* NAVBAR */}
-        <nav className={navClassName}>
-          {headerLinks.map((item, index) => (
-            <NavigationLink
-              key={item._key || `${item.label || "header-link"}-${index}`}
-              item={item}
-              className={navLinkClassName}
-            />
-          ))}
-        </nav>
+        <HeaderNav headerLinks={headerLinks} />
 
-        {/* Desktop search — hidden on mobile, identical on desktop */}
-        {showSearch ? (
-          isExternalSearchUrl ? (
-            <a className={searchClassName} href={searchUrl} aria-label="Search">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-6.5 h-6.5 relative z-10"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20L16.65 16.65" />
-              </svg>
-            </a>
-          ) : (
-            <Link
-              className={searchClassName}
-              href={searchUrl as string}
-              aria-label="Search"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-6.5 h-6.5 relative z-10"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20L16.65 16.65" />
-              </svg>
-            </Link>
-          )
+        {showSearch && searchUrl ? (
+          <HeaderSearch searchUrl={searchUrl} isExternal={isExternalSearchUrl} />
         ) : (
           <span className={searchPlaceholderClassName} aria-hidden />
         )}

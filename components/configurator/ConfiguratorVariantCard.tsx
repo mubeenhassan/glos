@@ -53,7 +53,7 @@ export default function ConfiguratorVariantCard({
   const desktopGridColumns = `minmax(140px, 1.35fr) ${nonSkuColumns.map(() => 'minmax(88px, 1fr)').join(' ')} 56px`
 
   return (
-    <article className="rounded-[10px] bg-white md:bg-[#FAFAFA] p-[17px] md:p-6 md:border-0 border border-[#E5E7EB]">
+    <article className="js-cfg-variant rounded-[10px] bg-white md:bg-[#FAFAFA] p-[17px] md:p-6 md:border-0 border border-[#E5E7EB]">
       <div className="mb-4 flex items-start justify-between gap-3 md:hidden">
         <div className="min-w-0 flex-1">
           <p className="m-0 truncate text-[12px] font-bold leading-4 text-[#6A7282]">Product Code</p>

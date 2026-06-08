@@ -7,6 +7,7 @@ export type ProductListingCardProps = {
   category?: string
   listingBadgeText?: string
   isNew?: boolean
+  className?: string
 }
 
 export default function ProductListingCard({
@@ -16,11 +17,12 @@ export default function ProductListingCard({
   category,
   listingBadgeText,
   isNew,
+  className,
 }: ProductListingCardProps) {
   const showBadge = Boolean(listingBadgeText || isNew)
 
   return (
-    <article className="group">
+    <article className={['group', className].filter(Boolean).join(' ')}>
       <Link href={`/products/${slug}`} className="block">
         <div className="relative overflow-hidden rounded-[8px] border border-[#0000001A] bg-[#ffffff] p-2.5 lg:p-3.5">
           <button

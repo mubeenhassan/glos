@@ -16,6 +16,7 @@ import ProductsFilterDropdown from "@/components/products/ProductsFilterDropdown
 import ProductsMobileFiltersSheet from "@/components/products/ProductsMobileFiltersSheet";
 import ProductsFilterSidebar from "@/components/products/ProductsFilterSidebar";
 import ProductListingCard from "@/components/products/ProductListingCard";
+import ProductsCatalogAnimations from "@/components/ProductsCatalogAnimations";
 import ProductsSortDropdown from "@/components/products/ProductsSortDropdown";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -645,17 +646,17 @@ export default async function ProductsPage({
   }
 
   return (
-    <main className="page-wrap cms-section-width pb-[40px] bg-white px-2 md:px-0">
-      <section className="mb-8 grid grid-cols-1 items-end gap-3 md:gap-6 pb-6 md:grid-cols-[1fr_auto] md:pb-8 lg:mb-10 lg:pb-10">
-        <h1 className="m-0 text-[24px] font-[500] md:font-semibold leading-[1.02] tracking-[-0.02em] text-[#111827] lg:text-[72px]">
+    <main className="products-catalog-page page-wrap cms-section-width pb-[40px] bg-white px-2 md:px-0">
+      <section className="js-products-hero mb-8 grid grid-cols-1 items-end gap-3 md:gap-6 pb-6 md:grid-cols-[1fr_auto] md:pb-8 lg:mb-10 lg:pb-10">
+        <h1 className="js-products-hero-title m-0 text-[24px] font-[500] md:font-semibold leading-[1.02] tracking-[-0.02em] text-[#111827] lg:text-[72px]">
           Our Products
         </h1>
-        <p className="m-0 text-[16px] md:text-[20px] leading-7 text-[#4b5563] md:text-right">
+        <p className="js-products-hero-sub m-0 text-[16px] md:text-[20px] leading-7 text-[#4b5563] md:text-right">
           Explore Our Innovative Lighting Solutions
         </p>
       </section>
 
-      <div className="mb-3 hidden items-center justify-between gap-4 lg:flex">
+      <div className="js-products-toolbar mb-3 hidden items-center justify-between gap-4 lg:flex">
         <h2 className="m-0 text-[24px] font-bold leading-none tracking-[-0.02em] text-[#111827]">
           All Products
         </h2>
@@ -666,7 +667,7 @@ export default async function ProductsPage({
         />
       </div>
 
-      <div className="mb-3 flex items-center justify-between gap-4 lg:hidden">
+      <div className="js-products-toolbar mb-3 flex items-center justify-between gap-4 lg:hidden">
         <h2 className="m-0 text-[18px] md:text-[24px] font-bold leading-none tracking-[-0.02em] text-[#111827]">
           All Products
         </h2>
@@ -694,13 +695,13 @@ export default async function ProductsPage({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:gap-8">
         <ProductsFilterSidebar
           clearAllHref={`/products?${baseForReset.toString()}`}
-          className="hidden lg:block"
+          className="js-products-sidebar hidden lg:block"
         >
           {orderedFilterDefinitions.map(renderFilterDefinition)}
         </ProductsFilterSidebar>
 
         <section className="min-w-0">
-          <div className="mb-4 hidden max-w-full flex-nowrap items-center overflow-x-auto rounded-[8px] bg-[#FAFAFA] [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden lg:inline-flex">
+          <div className="js-products-tabs mb-4 hidden max-w-full flex-nowrap items-center overflow-x-auto rounded-[8px] bg-[#FAFAFA] [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden lg:inline-flex">
             {listingTabs.map((tabItem) => (
               <Link
                 key={tabItem._key || tabItem.key}
@@ -716,10 +717,11 @@ export default async function ProductsPage({
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
+          <div className="js-products-grid grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
             {pagedProducts.map((product) => (
               <ProductListingCard
                 key={product._id}
+                className="js-products-card"
                 name={product.name}
                 slug={product.slug}
                 imageUrl={sanityImageUrl(product.listingCardImage, 620)}
@@ -730,7 +732,7 @@ export default async function ProductsPage({
             ))}
           </div>
 
-          <div className="mt-8 flex items-center justify-between">
+          <div className="js-products-pagination mt-8 flex items-center justify-between">
             <p className="m-0 text-[14px] text-[#6b7280]">
               Page {safePage} of {totalPages}
             </p>
@@ -763,6 +765,7 @@ export default async function ProductsPage({
           </div>
         </section>
       </div>
+      <ProductsCatalogAnimations />
     </main>
   );
 }
