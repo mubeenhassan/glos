@@ -36,7 +36,7 @@ export { CmsButtonsRow } from "@/components/cms/CmsButtons";
 const cmsPageClassName =
   "flex flex-col w-full gap-8 bg-white md:gap-12 lg:gap-20";
 
-const leadingHeroPageClassName = "pt-0 md:pt-4 overflow-hidden";
+const leadingHeroPageClassName = "pt-0 overflow-hidden";
 
 const leadingBrandFoundationPageClassName = "bg-white";
 

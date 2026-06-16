@@ -7,7 +7,7 @@ import type { SiteSettings } from "@/lib/cms";
 const navClassNameBase =
   "top-nav col-span-2 row-start-2 hidden min-h-11 w-full flex-nowrap items-center justify-start gap-4 rounded-full px-4 transition-[background-color,border-color,color,box-shadow] duration-300 [scrollbar-width:thin] md:col-span-1 md:col-start-2 md:row-start-1 md:flex md:min-h-12 md:w-auto md:flex-wrap md:justify-center md:gap-5 md:justify-self-center md:px-6 lg:gap-7 relative";
 
-const navClassNameHome = `${navClassNameBase} overflow-hidden border border-white/20 text-[#FFFFFF] bg-white/[0.08] shadow-[0_0_48px_-12px_rgba(255,255,255,0.15)] backdrop-blur-[15px] before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:shadow-[inset_1.22px_1.13px_4.62px_rgba(255,255,255,0.126)]`;
+const navClassNameHome = `${navClassNameBase} overflow-hidden  text-[#FFFFFF] bg-white/[0.08] shadow-[0_0_48px_-12px_rgba(255,255,255,0.15)] backdrop-blur-[15px] before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:shadow-[inset_1.22px_1.13px_4.62px_rgba(255,255,255,0.126)]`;
 
 const navClassNameInner = `${navClassNameBase} border-0 bg-[#FAFAFA] text-[#374151] shadow-none`;
 

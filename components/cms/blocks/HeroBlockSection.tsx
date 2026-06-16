@@ -7,7 +7,7 @@ import type { CmsBlockProps } from "@/components/cms/types";
 import { cx } from "@/components/cms/utils";
 
 const heroSectionClassName =
-  "cms-hero-block relative md:mx-auto md:mt-1 min-h-screen md:block flex items-center justify-center w-full md:w-[calc(100%_-_8px)] overflow-hidden md:rounded-2xl bg-[#111111] px-5 pb-11 pt-32 text-white md:min-h-[560px] md:px-6 md:pb-16 md:pt-40 lg:min-h-[640px] lg:px-12 lg:pt-44 xl:min-h-[clamp(610px,78vh,1040px)] lg:w-[min(100%_-_8px,1728px)] lg:px-[clamp(28px,4.2vw,74px)] lg:pb-[clamp(64px,9vh,122px)] lg:pt-[clamp(150px,16vh,218px)]";
+  "cms-hero-block relative min-h-screen md:block flex items-center justify-center w-full overflow-hidden bg-[#111111] px-5 pb-11 pt-32 text-white md:min-h-[560px] md:px-6 md:pb-16 md:pt-40 lg:min-h-[640px] lg:px-12 lg:pt-44 xl:min-h-[clamp(610px,78vh,1040px)]  lg:px-[clamp(28px,4.2vw,74px)] lg:pb-[clamp(64px,9vh,122px)] lg:pt-[clamp(150px,16vh,218px)]";
 
 const heroBackgroundClassName = "absolute inset-0";
 
