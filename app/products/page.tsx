@@ -701,7 +701,7 @@ export default async function ProductsPage({
         </ProductsFilterSidebar>
 
         <section className="min-w-0">
-          <div className="js-products-tabs mb-4 hidden max-w-full flex-nowrap items-center overflow-x-auto rounded-[8px] bg-[#FAFAFA] [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden lg:inline-flex">
+          <div className="js-products-tabs mb-4 hidden max-w-full flex-nowrap items-center overflow-x-auto gap-1 rounded-[8px] bg-[#FAFAFA] [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden lg:inline-flex">
             {listingTabs.map((tabItem) => (
               <Link
                 key={tabItem._key || tabItem.key}

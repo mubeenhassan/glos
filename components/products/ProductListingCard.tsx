@@ -77,12 +77,12 @@ export default function ProductListingCard({
             </span>
           ) : null}
 
-          <h3 className="m-0 mt-4 text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] text-[#111827] md:text-[24px]">
+          <h3 className="m-0 mt-4 text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] text-[#111827] md:text-[20px]">
             {name}
           </h3>
-          <p className="m-0 mt-4 text-[20px] font-semibold leading-none text-[#FB612E] underline decoration-1 underline-offset-[3px] md:text-[16px]">
+          {/* <p className="m-0 mt-4 text-[20px] font-semibold leading-none text-[#FB612E] underline decoration-1 underline-offset-[3px] md:text-[16px]">
             View Details
-          </p>
+          </p> */}
         </div>
       </Link>
     </article>

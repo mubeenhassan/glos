@@ -38,7 +38,9 @@ function ProductFeatureSections({ product }: { product: ProductDetail }) {
         return (
           <article
             key={block._key}
-            className={`js-pdp-feature grid items-center gap-6 md:grid-cols-2 md:gap-10 ${reverse ? "md:[&>*:first-child]:order-2" : ""}`}
+            className={`js-pdp-feature grid items-center gap-6 md:grid-cols-2 md:gap-10 ${
+              reverse ? "md:[&>*:first-child]:order-2" : ""
+            }`}
           >
             <div className="overflow-hidden rounded-[8px] border border-[#eceef2] bg-[#f7f7f8]">
               <div className="aspect-16/11">
@@ -124,7 +126,7 @@ export default async function ProductDetailPage({
   const detailVariant =
     product.detailVariant &&
     product.variants.some(
-      (variant) => variant._id === product.detailVariant?._id,
+      (variant) => variant._id === product.detailVariant?._id
     )
       ? product.detailVariant
       : product.variants[0];
@@ -133,7 +135,7 @@ export default async function ProductDetailPage({
     ...(product.productAttributes || []),
     ...(detailVariant?.specAttributes || []).filter(
       (item) =>
-        !pickAttribute(product.productAttributes, item.definition?.key || ""),
+        !pickAttribute(product.productAttributes, item.definition?.key || "")
     ),
   ];
 
@@ -142,7 +144,7 @@ export default async function ProductDetailPage({
     ...(detailVariant?.downloads || []),
   ].filter(
     (item, index, all) =>
-      all.findIndex((other) => other._id === item._id) === index,
+      all.findIndex((other) => other._id === item._id) === index
   );
 
   const hasModels = (product.availableModels || []).length > 0;
@@ -153,8 +155,7 @@ export default async function ProductDetailPage({
   const hasRelated = (product.relatedProducts || []).length > 0;
 
   const tabs = [
-    { key: "models", label: "Available models", visible: hasModels },
-    { key: "specifications", label: "Specifications", visible: hasSpecs },
+    
     { key: "resources", label: "Resources", visible: hasResources },
     { key: "highlights", label: "Highlights", visible: hasHighlights },
     { key: "perfectFor", label: "Perfect for", visible: hasPerfectFor },
@@ -306,52 +307,7 @@ export default async function ProductDetailPage({
         ) : null}
 
         <div className="js-pdp-tab-panel mt-7">
-          {activeTab === "models" ? (
-            <>
-              <h3 className="m-0 text-[20px] font-[500] md:font-[600] leading-[1.02] tracking-[-0.02em] text-[#111827] md:text-[28px]">
-                Available Models
-              </h3>
-              <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-                {(product.availableModels || []).map((model) => {
-                  const modelImageUrl = sanityImageUrl(
-                    model.listingCardImage,
-                    360,
-                  );
-                  const isActive = model.slug === product.slug;
-                  return (
-                    <Link
-                      href={`/products/${model.slug}`}
-                      key={model._id}
-                      className={`rounded-[8px] border p-2.5 transition-colors ${
-                        isActive
-                          ? "border-(--color-brand-orange) bg-[#fff7f3]"
-                          : "border-[#eceef2] hover:border-[#d7dbe2]"
-                      }`}
-                    >
-                      <div className="aspect-16/11 overflow-hidden rounded-[6px] bg-[#f6f6f7]">
-                        {modelImageUrl ? (
-                          <img
-                            src={modelImageUrl}
-                            alt={model.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="product-placeholder h-full w-full" />
-                        )}
-                      </div>
-                      <p className="m-0 mt-2 text-[14px] font-medium text-[#111827]">
-                        {model.name}
-                      </p>
-                    </Link>
-                  );
-                })}
-              </div>
-            </>
-          ) : null}
-
-          {activeTab === "specifications" ? (
-            <ProductSpecificationsTab attributes={mergedSpecs} />
-          ) : null}
+         
 
           {activeTab === "resources" ? (
             <ProductResourcesTab resources={resources} />
@@ -428,12 +384,55 @@ export default async function ProductDetailPage({
             <RelatedProductsSection product={product} />
           ) : null}
         </div>
+        <div className="js-pdp-tab-panel my-12">
+          <h3 className="m-0 text-[20px] font-[500] md:font-[600] leading-[1.02] tracking-[-0.02em] text-[#111827] md:text-[28px]">
+            Available Models
+          </h3>
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {(product.availableModels || []).map((model) => {
+              const modelImageUrl = sanityImageUrl(model.listingCardImage, 360);
+              const isActive = model.slug === product.slug;
+              return (
+                <Link
+                  href={`/products/${model.slug}`}
+                  key={model._id}
+                  className={`rounded-[8px] border p-2.5 transition-colors ${
+                    isActive
+                      ? "border-(--color-brand-orange) bg-[#fff7f3]"
+                      : "border-[#eceef2] hover:border-[#d7dbe2]"
+                  }`}
+                >
+                  <div className="aspect-16/11 overflow-hidden rounded-[6px] bg-[#f6f6f7]">
+                    {modelImageUrl ? (
+                      <img
+                        src={modelImageUrl}
+                        alt={model.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="product-placeholder h-full w-full" />
+                    )}
+                  </div>
+                  <p className="m-0 mt-2 text-[14px] font-medium text-[#111827]">
+                    {model.name}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex flex-col gap-4 mt-2">
+          <h3 className="m-0 text-[20px] font-[500] md:font-[600] leading-[1.02] tracking-[-0.02em] text-[#111827] md:text-[28px]">
+            Specifications
+          </h3>
+          <ProductSpecificationsTab attributes={mergedSpecs} />
+        </div>
       </section>
 
       <ProductFeatureSections product={product} />
-      {activeTab !== "related" ? (
+      {/* {activeTab !== "related" ? (
         <RelatedProductsSection product={product} />
-      ) : null}
+      ) : null} */}
       <ProductDetailAnimations />
     </main>
   );

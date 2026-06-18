@@ -13,7 +13,7 @@ type SiteHeaderProps = {
 };
 
 const headerClassName =
-  "topbar fixed left-0 right-0 top-0 z-[9999] pt-0 md:pt-4";
+  "topbar fixed left-0 right-0 top-0 z-[9999] pt-0 md:pt-2";
 
 // Mobile: 1fr (brand fills space, pushes hamburger right) + auto (hamburger).
 // Desktop unchanged: auto (brand) + 1fr (nav) + auto (search).
