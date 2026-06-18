@@ -1,31 +1,34 @@
-import Link from 'next/link'
-import type {ProductVariant} from '@/lib/catalog'
+import Link from "next/link";
+import type { ProductVariant } from "@/lib/catalog";
+import ActionMenu from "../products/ActionMenu";
 
 type TableColumn = {
-  _id: string
-  key: string
-  title: string
-}
+  _id: string;
+  key: string;
+  title: string;
+};
 
 type ConfiguratorVariantCardProps = {
-  variant: ProductVariant
-  nonSkuColumns: TableColumn[]
-  detailHref: string
-  getColumnValue: (variant: ProductVariant, key: string) => string
-}
+  variant: ProductVariant;
+  nonSkuColumns: TableColumn[];
+  detailHref: string;
+  getColumnValue: (variant: ProductVariant, key: string) => string;
+};
 
 function VariantField({
   label,
   value,
   href,
 }: {
-  label: string
-  value: string
-  href?: string
+  label: string;
+  value: string;
+  href?: string;
 }) {
   return (
     <div className="min-w-0 overflow-hidden">
-      <p className="m-0 truncate text-[12px] md:text-sm font-bold leading-4 text-[#111827]">{label}</p>
+      <p className="m-0 truncate text-[12px] md:text-sm font-bold leading-4 text-[#111827]">
+        {label}
+      </p>
       {href ? (
         <Link
           className="mt-1 block min-h-5 min-w-0 truncate text-[15px] font-bold leading-5 text-[#FB612E] underline underline-offset-2"
@@ -36,12 +39,15 @@ function VariantField({
           {value}
         </Link>
       ) : (
-        <p className="m-0 mt-1 min-h-5 truncate text-[14px] md:text-[15px] font-normal leading-5 text-[#374151]" title={value}>
+        <p
+          className="m-0 mt-1 min-h-5 truncate text-[14px] md:text-[15px] font-normal leading-5 text-[#374151]"
+          title={value}
+        >
           {value}
         </p>
       )}
     </div>
-  )
+  );
 }
 
 export default function ConfiguratorVariantCard({
@@ -50,13 +56,16 @@ export default function ConfiguratorVariantCard({
   detailHref,
   getColumnValue,
 }: ConfiguratorVariantCardProps) {
-  const desktopGridColumns = `minmax(140px, 1.35fr) ${nonSkuColumns.map(() => 'minmax(88px, 1fr)').join(' ')} 56px`
-
+  const desktopGridColumns = `minmax(140px, 1.35fr) ${nonSkuColumns
+    .map(() => "minmax(88px, 1fr)")
+    .join(" ")} 56px`;
   return (
     <article className="js-cfg-variant rounded-[10px] bg-white md:bg-[#FAFAFA] p-[17px] md:p-6 md:border-0 border border-[#E5E7EB]">
       <div className="mb-4 flex items-start justify-between gap-3 md:hidden">
         <div className="min-w-0 flex-1">
-          <p className="m-0 truncate text-[12px] font-bold leading-4 text-[#6A7282]">Product Code</p>
+          <p className="m-0 truncate text-[12px] font-bold leading-4 text-[#6A7282]">
+            Product Code
+          </p>
           <Link
             className="mt-1 block min-h-5 min-w-0 truncate text-[16px] font-bold leading-5 !text-[#FB612E] !underline !underline-offset-2"
             href={detailHref}
@@ -78,9 +87,13 @@ export default function ConfiguratorVariantCard({
 
       <div
         className="hidden gap-x-4 gap-y-3 min-[1261px]:grid"
-        style={{gridTemplateColumns: desktopGridColumns}}
+        style={{ gridTemplateColumns: desktopGridColumns }}
       >
-        <VariantField label="Product Code" value={variant.sku} href={detailHref} />
+        <VariantField
+          label="Product Code"
+          value={variant.sku}
+          href={detailHref}
+        />
 
         {nonSkuColumns.map((column) => (
           <VariantField
@@ -90,17 +103,12 @@ export default function ConfiguratorVariantCard({
           />
         ))}
 
-        <div className="min-w-0 overflow-hidden">
-          <p className="m-0 truncate text-sm font-bold leading-4 text-[#111827]">Action</p>
+        <div className="min-w-0 ">
+          <p className="m-0 truncate text-sm font-bold leading-4 text-[#111827]">
+            Action
+          </p>
           <div className="mt-1 flex min-h-5 items-center">
-            <Link
-              className="inline-flex size-5 items-center justify-center text-xl leading-none text-[#6b7280] hover:text-[#111827]"
-              href={detailHref}
-              scroll={false}
-              aria-label={`View details for ${variant.sku}`}
-            >
-              <span aria-hidden="true">⋯</span>
-            </Link>
+           <ActionMenu props={variant.downloads ?? []} />
           </div>
         </div>
       </div>
@@ -115,5 +123,5 @@ export default function ConfiguratorVariantCard({
         ))}
       </div>
     </article>
-  )
+  );
 }
