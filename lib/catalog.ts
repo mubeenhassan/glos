@@ -562,6 +562,7 @@ export async function getProductBySlug(slug: string) {
 export async function getConfiguratorBySlug(slug: string) {
   const result = await fetchSanity<ConfiguratorData | null>(CONFIGURATOR_QUERY, {slug})
   const config = result?.config ?? DEFAULT_CONFIGURATOR_CONFIG
+  const product = result?.product ? normalizeProductDetail(result.product) : null
   const normalizedFilterDefinitions = (config.filterDefinitions ?? [])
     .map(normalizeAttributeDefinition)
     .filter((definition): definition is AttributeDefinition => Boolean(definition?.key))
@@ -571,9 +572,17 @@ export async function getConfiguratorBySlug(slug: string) {
   const normalizedVisibleColumns = (config.defaultVisibleColumns ?? [])
     .map(normalizeAttributeDefinition)
     .filter((definition): definition is AttributeDefinition => Boolean(definition?.key))
+  const usedOptionIds = new Set(
+    (product?.variants ?? []).flatMap((variant) =>
+      [...variant.configSelections, ...variant.specAttributes].flatMap((attribute) => [
+        ...(attribute.singleOptionValue ? [attribute.singleOptionValue._id] : []),
+        ...(attribute.multiOptionValues ?? []).map((option) => option._id),
+      ]),
+    ),
+  )
 
   return {
-    product: result?.product ? normalizeProductDetail(result.product) : null,
+    product,
     config: {
       filterDefinitions: normalizedFilterDefinitions,
       tableColumns: normalizedTableColumns,
@@ -584,7 +593,7 @@ export async function getConfiguratorBySlug(slug: string) {
       enableStockOnlyToggle:
         config.enableStockOnlyToggle ?? DEFAULT_CONFIGURATOR_CONFIG.enableStockOnlyToggle,
     },
-    options: result?.options ?? [],
+    options: (result?.options ?? []).filter((option) => usedOptionIds.has(option._id)),
   }
 }
 

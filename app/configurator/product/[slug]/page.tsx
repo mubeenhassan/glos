@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   attributeValueToLabel,
+  attributeValueToTokens,
   filterVariantsBySelections,
   getConfiguratorBySlug,
   parseMultiParam,
@@ -342,10 +343,29 @@ export default async function ConfiguratorPage({
   const skuQuery = toSingle(rawSearch.q) || "";
 
   const optionsByDefinition = new Map<string, typeof options>();
-  options.forEach((option) => {
-    const existing = optionsByDefinition.get(option.definitionRef) ?? [];
-    existing.push(option);
-    optionsByDefinition.set(option.definitionRef, existing);
+  filterDefinitions.forEach((definition) => {
+    if (definition.valueType === "number") return;
+
+    const otherSelections = Object.fromEntries(
+      Object.entries(selectedFilters).filter(([key]) => key !== definition.key),
+    );
+    const compatibleVariants = filterVariantsBySelections(
+      product.variants,
+      otherSelections,
+      stockedOnly,
+    );
+    const availableTokens = new Set(
+      compatibleVariants.flatMap((variant) => {
+        const attribute = getVariantAttribute(variant, definition.key);
+        return attributeValueToTokens(attribute);
+      }),
+    );
+    const availableOptions = options.filter(
+      (option) =>
+        option.definitionRef === definition._id &&
+        availableTokens.has(valueToToken(option.value)),
+    );
+    optionsByDefinition.set(definition._id, availableOptions);
   });
 
   if (selectedVariantBySku) {

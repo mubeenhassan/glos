@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "audit:catalog": "node --env-file=.env scripts/audit-catalog.mjs",
+    "migrate:model-scopes": "node --env-file=.env scripts/migrate-model-option-scopes.mjs"
   },
   "dependencies": {
     "@sanity/client": "^7.23.0",
