@@ -17,6 +17,8 @@ export type AttributeOption = {
   value: string
   order?: number
   definitionRef: string
+  swatchHex?: string
+  swatchImage?: SanityImage
 }
 
 export type AttributeValue = {
@@ -270,6 +272,8 @@ const LISTING_QUERY = `{
     label,
     value,
     order,
+    swatchHex,
+    swatchImage,
     "definitionRef": definition._ref
   },
   "products": *[_type == "product" && status == "active"] | order(coalesce(sortPriority, 9999) asc, name asc) {
@@ -521,6 +525,8 @@ const CONFIGURATOR_QUERY = `{
     label,
     value,
     order,
+    swatchHex,
+    swatchImage,
     "definitionRef": definition._ref
   }
 }`

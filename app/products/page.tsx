@@ -7,6 +7,7 @@ import {
   parseMultiParam,
   pickAttribute,
   type AttributeDefinition,
+  type AttributeOption,
 } from "@/lib/catalog";
 import { sanityImageUrl, valueToToken } from "@/lib/sanity";
 import NumericRangeFilter from "@/components/NumericRangeFilter";
@@ -177,12 +178,7 @@ function swatchColor(label: string) {
   return "#cfd2d8";
 }
 
-type FilterOption = {
-  _id: string;
-  label: string;
-  value: string;
-  definitionRef: string;
-};
+type FilterOption = AttributeOption;
 
 export default async function ProductsPage({
   searchParams,
@@ -232,7 +228,7 @@ export default async function ProductsPage({
 
   const numericFilterOptionsByDefinitionKey = new Map<
     string,
-    { _id: string; label: string; value: string; definitionRef: string }[]
+    FilterOption[]
   >();
   const derivedFilterOptionsByDefinitionKey = new Map<string, FilterOption[]>();
 
@@ -609,7 +605,12 @@ export default async function ProductsPage({
                   <span
                     className="filter-swatch"
                     style={{
-                      backgroundColor: swatchColor(option.label),
+                      backgroundColor: option.swatchHex || swatchColor(option.label),
+                      backgroundImage: option.swatchImage
+                        ? `url(${sanityImageUrl(option.swatchImage, 120)})`
+                        : undefined,
+                      backgroundPosition: "center",
+                      backgroundSize: "cover",
                     }}
                     aria-hidden="true"
                   />

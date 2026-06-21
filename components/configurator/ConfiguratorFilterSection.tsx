@@ -9,16 +9,19 @@ import {
 } from '@/lib/configuratorFilters'
 import {
   colourTemperatureSwatchColor,
+  finishSwatchColor,
   getConfiguratorChipGridClass,
   getConfiguratorFilterLayout,
   splitModelOptionLabel,
 } from '@/lib/configuratorDisplay'
-import {valueToToken} from '@/lib/sanity'
+import {sanityImageUrl, type SanityImage, valueToToken} from '@/lib/sanity'
 
 type FilterOption = {
   _id: string
   label: string
   value: string
+  swatchHex?: string
+  swatchImage?: SanityImage
 }
 
 type ConfiguratorFilterSectionProps = {
@@ -174,6 +177,7 @@ export default function ConfiguratorFilterSection({
                   productSlug,
                   toggleFilter(urlParams, definition, token, singleSelect),
                 )
+            const swatchImageUrl = sanityImageUrl(option.swatchImage, 160)
 
             return (
               <FilterOptionLink
@@ -183,6 +187,14 @@ export default function ConfiguratorFilterSection({
                 disabled={isDisabled}
                 className={finishCardClass(active, isDisabled)}
               >
+                <span
+                  className="h-10 w-full rounded-md border border-black/10 bg-cover bg-center"
+                  style={{
+                    backgroundColor: option.swatchHex || finishSwatchColor(option.label),
+                    backgroundImage: swatchImageUrl ? `url(${swatchImageUrl})` : undefined,
+                  }}
+                  aria-hidden="true"
+                />
                 <span>{option.label}</span>
               </FilterOptionLink>
             )
@@ -232,6 +244,7 @@ export default function ConfiguratorFilterSection({
                   toggleFilter(urlParams, definition, token, singleSelect),
                 )
             const {primary, secondary} = splitModelOptionLabel(option.label)
+            const swatchImageUrl = sanityImageUrl(option.swatchImage, 240)
 
             return (
               <FilterOptionLink
@@ -241,6 +254,16 @@ export default function ConfiguratorFilterSection({
                 disabled={isDisabled}
                 className={cardOptionClass(active, isDisabled)}
               >
+                {swatchImageUrl || option.swatchHex ? (
+                  <span
+                    className="mb-1 h-14 w-full bg-contain bg-center bg-no-repeat"
+                    style={{
+                      backgroundColor: option.swatchHex,
+                      backgroundImage: swatchImageUrl ? `url(${swatchImageUrl})` : undefined,
+                    }}
+                    aria-hidden="true"
+                  />
+                ) : null}
                 <span className="font-semibold text-[#111827]">{primary}</span>
                 {secondary ? (
                   <span className="text-xs leading-4 text-[#6b7280]">{secondary}</span>

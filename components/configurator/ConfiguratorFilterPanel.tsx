@@ -1,14 +1,9 @@
 import Link from 'next/link'
-import type {AttributeDefinition} from '@/lib/catalog'
+import type {AttributeDefinition, AttributeOption} from '@/lib/catalog'
 import ConfiguratorFilterSection from '@/components/configurator/ConfiguratorFilterSection'
 import {configuratorHref} from '@/lib/configuratorFilters'
 
-type FilterOption = {
-  _id: string
-  label: string
-  value: string
-  definitionRef?: string
-}
+type FilterOption = Omit<AttributeOption, 'definitionRef'> & {definitionRef?: string}
 
 type ConfiguratorFilterPanelProps = {
   sidebarTitle: string
