@@ -91,6 +91,19 @@ img {
   flex: 1;
 }
 
+.product-overview-slide {
+  width: min(var(--overview-slide-mobile-width), 90vw);
+  max-width: 720px;
+  aspect-ratio: var(--overview-slide-aspect);
+}
+
+@media (min-width: 768px) {
+  .product-overview-slide {
+    width: min(var(--overview-slide-desktop-width), 86vw);
+    max-width: 960px;
+  }
+}
+
 /* Shared content width for home CMS blocks, projects listing, and project detail */
 .cms-section-width {
   width: calc(100% - 24px);

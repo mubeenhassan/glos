@@ -86,6 +86,43 @@ export type ProductVariant = {
   downloads?: ResourceAsset[]
 }
 
+export type ProductOverview = {
+  heading?: string
+  description?: string
+  slides?: {
+    key: string
+    image?: SanityImage
+    alt: string
+    hotspots: {
+      key: string
+      x: number
+      y: number
+      product: {
+        _id: string
+        name: string
+        slug: string
+        shortDescription?: string
+        listingBadgeText?: string
+      } | null
+    }[]
+  }[]
+  highlights?: {
+    key: string
+    title: string
+    description: string
+    icon?: SanityImage
+  }[]
+  splitFeature?: {
+    heading: string
+    description: string
+    images: {
+      key: string
+      image?: SanityImage
+      alt: string
+    }[]
+  }
+}
+
 export type ListingConfig = {
   defaultSort?: 'recommended' | 'newest' | 'nameAsc' | 'nameDesc'
   itemsPerPage?: number
@@ -110,6 +147,7 @@ export type ProductDetail = {
   category?: string
   family?: string
   heroMedia?: MediaItem[]
+  overview?: ProductOverview
   productAttributes?: AttributeValue[]
   resources?: ResourceAsset[]
   featureBlocks?: {
@@ -251,6 +289,28 @@ function normalizeProductCard(product: ProductCard): ProductCard {
 function normalizeProductDetail(product: ProductDetail): ProductDetail {
   return {
     ...product,
+    overview: product.overview
+      ? {
+          ...product.overview,
+          slides: (product.overview.slides ?? []).map((slide) => ({
+            ...slide,
+            hotspots: (slide.hotspots ?? []).filter(
+              (hotspot) =>
+                hotspot.product &&
+                Boolean(hotspot.product.slug) &&
+                Number.isFinite(hotspot.x) &&
+                Number.isFinite(hotspot.y),
+            ),
+          })),
+          highlights: product.overview.highlights ?? [],
+          splitFeature: product.overview.splitFeature
+            ? {
+                ...product.overview.splitFeature,
+                images: product.overview.splitFeature.images ?? [],
+              }
+            : undefined,
+        }
+      : undefined,
     detailVariant: product.detailVariant ? normalizeVariant(product.detailVariant) : undefined,
     variants: (product.variants ?? []).map(normalizeVariant),
     productAttributes: (product.productAttributes ?? []).map(normalizeAttributeValue),
@@ -326,6 +386,36 @@ const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug && status =
   "category": category->title,
   "family": family->title,
   heroMedia[]{_key, type, image, externalImageUrl, videoUrl},
+  overview{
+    heading,
+    description,
+    slides[]{
+      "key": _key,
+      image,
+      "alt": image.alt,
+      hotspots[]{
+        "key": _key,
+        x,
+        y,
+        "product": select(
+          product->status == "active" => product->{
+            _id,
+            name,
+            "slug": slug.current,
+            shortDescription,
+            listingBadgeText
+          },
+          null
+        )
+      }
+    },
+    highlights[]{"key": _key, title, description, icon},
+    splitFeature{
+      heading,
+      description,
+      images[]{"key": _key, "image": @, "alt": alt}
+    }
+  },
   productAttributes[]{
     definition->{_id, key, title, valueType, unit, displayGroup, displayOrder},
     numberValue,

@@ -8,6 +8,7 @@ import ProductListingCard from "@/components/products/ProductListingCard";
 import ProductSpecificationsTab from "@/components/products/ProductSpecificationsTab";
 import ProductResourcesTab from "@/components/products/ProductResourcesTab";
 import ProductDetailAnimations from "@/components/products/ProductDetailAnimations";
+import ProductOverviewSection from "@/components/products/ProductOverviewSection";
 import { mediaImageUrl, sanityImageUrl } from "@/lib/sanity";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -283,6 +284,8 @@ export default async function ProductDetailPage({
           </div>
         </div>
       </section>
+
+      <ProductOverviewSection overview={product.overview} />
 
       <section className="mt-20">
         {tabs.length > 0 ? (

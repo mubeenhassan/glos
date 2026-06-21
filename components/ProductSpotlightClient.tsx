@@ -5,6 +5,7 @@ import Link from 'next/link'
 import {FiHeart, FiPlus} from 'react-icons/fi'
 import gsap from 'gsap'
 import {ScrollTrigger} from 'gsap/ScrollTrigger'
+import ProductHotspotButton from '@/components/products/ProductHotspotButton'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -260,24 +261,11 @@ export default function ProductSpotlightClient({
                 className={hotspotWrapClassName}
                 style={{left: `${item.hotspotX}%`, top: `${item.hotspotY}%`}}
               >
-                <button
-                  className={cx(
-                    'product-hotspot-btn absolute grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center rounded-full border-[7px] shadow-[0_12px_26px_rgba(0,0,0,0.18)] transition-all duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[rgba(255,95,46,0.34)]  md:border-8',
-                    isOpen
-                      ? ' bg-[var(--color-brand-orange)] shadow-[0_0_0_5px_rgba(255,95,46,0.16),0_12px_26px_rgba(0,0,0,0.18)]'
-                      : 'border-[#080707] bg-[var(--color-brand-orange)]',
-                  )}
+                <ProductHotspotButton
+                  isOpen={isOpen}
                   onClick={() => setOpenIndex((prev) => (prev === item.index ? null : item.index))}
-                  aria-expanded={isOpen}
-                  aria-label={`${isOpen ? 'Close' : 'Open'} ${item.name} details`}
-                >
-                  <span
-                    className={cx(
-                      'h-4 w-4 rounded-full transition-colors duration-200',
-                      isOpen ? ' bg-[#080707]' : 'bg-transparent',
-                    )}
-                  />
-                </button>
+                  label={`${isOpen ? 'Close' : 'Open'} ${item.name} details`}
+                />
 
                 {/* Popover — always mounted for smooth exit transition */}
                 <div
