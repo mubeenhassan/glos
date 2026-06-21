@@ -151,14 +151,14 @@ export default async function ProductDetailPage({
   const hasSpecs = mergedSpecs.length > 0;
   const hasResources = resources.length > 0;
   const hasHighlights = (product.iconHighlights || []).length > 0;
-  const hasPerfectFor = (product.perfectFor || []).length > 0;
+  const hasApplications = (product.perfectFor || []).length > 0;
   const hasRelated = (product.relatedProducts || []).length > 0;
 
   const tabs = [
     
     { key: "resources", label: "Resources", visible: hasResources },
     { key: "highlights", label: "Highlights", visible: hasHighlights },
-    { key: "perfectFor", label: "Perfect for", visible: hasPerfectFor },
+    { key: "perfectFor", label: "Applications", visible: hasApplications },
     { key: "related", label: "Related products", visible: hasRelated },
   ].filter((tab) => tab.visible);
 
@@ -341,7 +341,7 @@ export default async function ProductDetailPage({
           {activeTab === "perfectFor" ? (
             <>
               <h3 className="m-0 text-[28px] font-semibold tracking-[-0.02em] text-[#111827]">
-                Perfect For
+                Applications
               </h3>
               <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {(product.perfectFor || []).map((item) => {

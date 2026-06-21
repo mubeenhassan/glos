@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type {ProductVariant} from '@/lib/catalog'
+import VariantAssetMenu from '@/components/configurator/VariantAssetMenu'
 
 type TableColumn = {
   _id: string
@@ -66,14 +67,11 @@ export default function ConfiguratorVariantCard({
             {variant.sku}
           </Link>
         </div>
-        <Link
-          className="inline-flex size-8 shrink-0 items-center justify-center text-xl leading-none text-[#6A7282] hover:text-[#111827]"
-          href={detailHref}
-          scroll={false}
-          aria-label={`View details for ${variant.sku}`}
-        >
-          <span aria-hidden="true">⋯</span>
-        </Link>
+        <VariantAssetMenu
+          downloads={variant.downloads}
+          sku={variant.sku}
+          triggerClassName="size-8 shrink-0"
+        />
       </div>
 
       <div
@@ -90,17 +88,10 @@ export default function ConfiguratorVariantCard({
           />
         ))}
 
-        <div className="min-w-0 overflow-hidden">
+        <div className="min-w-0">
           <p className="m-0 truncate text-sm font-bold leading-4 text-[#111827]">Action</p>
           <div className="mt-1 flex min-h-5 items-center">
-            <Link
-              className="inline-flex size-5 items-center justify-center text-xl leading-none text-[#6b7280] hover:text-[#111827]"
-              href={detailHref}
-              scroll={false}
-              aria-label={`View details for ${variant.sku}`}
-            >
-              <span aria-hidden="true">⋯</span>
-            </Link>
+            <VariantAssetMenu downloads={variant.downloads} sku={variant.sku} />
           </div>
         </div>
       </div>

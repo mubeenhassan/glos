@@ -1,11 +1,13 @@
-import { EnvelopeIcon, MarkerIcon, MobileDeviceIcon } from "@sanity/icons";
 import Link from "next/link";
 import {
+  FaEnvelope,
   FaFacebookF,
   FaGithub,
   FaGlobe,
   FaInstagram,
   FaLinkedinIn,
+  FaLocationDot,
+  FaPhone,
   FaTwitter,
   FaXTwitter,
   FaYoutube,
@@ -315,7 +317,7 @@ export default function SiteFooter({ siteSettings }: SiteFooterProps) {
 
       "
                     >
-                      <MarkerIcon className=""/>
+                      <FaLocationDot />
                     </span>
                     <span className="!text-[16px]">{footerAddress}</span>
                   </div>
@@ -324,7 +326,7 @@ export default function SiteFooter({ siteSettings }: SiteFooterProps) {
                 {footerPhone && footerPhoneHref ? (
                   <div className="footer-contact-item">
                     <span className="footer-icon-circle ">
-                      <MobileDeviceIcon />
+                      <FaPhone />
                     </span>
                     <a className="!text-[16px]" href={`tel:${footerPhoneHref}`}>{footerPhone}</a>
                   </div>
@@ -333,7 +335,7 @@ export default function SiteFooter({ siteSettings }: SiteFooterProps) {
                 {footerEmail ? (
                   <div className="footer-contact-item">
                     <span className="footer-icon-circle">
-                      <EnvelopeIcon />
+                      <FaEnvelope />
                     </span>
                     <a className="!text-[16px]" href={`mailto:${footerEmail}`}>{footerEmail}</a>
                   </div>

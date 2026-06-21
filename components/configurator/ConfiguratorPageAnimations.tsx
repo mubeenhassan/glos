@@ -153,6 +153,7 @@ export default function ConfiguratorPageAnimations() {
           autoAlpha: 1,
           x: 0,
           clipPath: 'inset(0% 0% 0% 0%)',
+          clearProps: 'clipPath,transform',
           duration: 0.62,
           stagger: 0.07,
           ease: 'power3.out',

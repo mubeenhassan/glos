@@ -497,7 +497,14 @@ const CONFIGURATOR_QUERY = `{
         singleOptionValue->{_id, label, value},
         multiOptionValues[]->{_id, label, value}
       },
-      downloads[]->{_id, title, type, externalUrl}
+      downloads[]->{
+        _id,
+        title,
+        type,
+        externalUrl,
+        "fileUrl": coalesce(externalUrl, file.asset->url),
+        "fileByteSize": file.asset->size
+      }
     }
   },
   "config": *[_type == "configuratorPageConfig"][0]{
