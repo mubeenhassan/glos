@@ -23,6 +23,20 @@ import ConfiguratorVariantCard from "@/components/configurator/ConfiguratorVaria
 import ConfiguratorPageAnimations from "@/components/configurator/ConfiguratorPageAnimations";
 import { buildSkuDetailPayload } from "@/lib/configuratorSkuDetail";
 
+function buildPageNumbers(current: number, total: number): (number | "…")[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const pages: (number | "…")[] = [1];
+  if (current > 4) pages.push("…");
+  const start = Math.max(2, current - 2);
+  const end = Math.min(total - 1, current + 2);
+  for (let i = start; i <= end; i++) pages.push(i);
+  if (current < total - 3) pages.push("…");
+  pages.push(total);
+  return pages;
+}
+
 function formatNumericFilterLabel(value: number, unit?: string) {
   const formatted = Number.isInteger(value)
     ? value.toString()
@@ -423,12 +437,7 @@ export default async function ConfiguratorPage({
     ? Boolean(selectedVariantBySku?.isStocked && stockedOnly)
     : stockedOnly;
 
-  const sizeParam = Number(
-    toSingle(rawSearch.pageSize) || config.defaultPageSize,
-  );
-  const pageSize = config.pageSizeOptions.includes(sizeParam)
-    ? sizeParam
-    : config.defaultPageSize;
+  const pageSize = config.defaultPageSize;
 
   const listFilteredVariants = filterVariantsBySelections(
     product.variants,
@@ -504,12 +513,23 @@ export default async function ConfiguratorPage({
           })(),
         )
       : null;
+
+  const pageNumbers = buildPageNumbers(safePage, totalPages);
+  const pageHrefs = pageNumbers.map((p) => {
+    if (p === "…") return null;
+    const pp = new URLSearchParams(urlParams.toString());
+    pp.set("page", String(p));
+    return configuratorHref(product.slug, pp.toString());
+  });
+
+  const firstItem =
+    listFilteredVariants.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
+  const lastItem = Math.min(safePage * pageSize, listFilteredVariants.length);
+  const totalItems = listFilteredVariants.length;
   const sidebarTitle = product.family || product.name;
 
   const stockCheckClass = (active: boolean) =>
-    active
-      ? 'border-[#FB612E] bg-[#FB612E]'
-      : 'border-black/10 bg-white'
+    active ? "border-[#FB612E] bg-[#FB612E]" : "border-black/10 bg-white";
 
   const filterPanelProps = {
     sidebarTitle,
@@ -545,7 +565,7 @@ export default async function ConfiguratorPage({
             <span aria-hidden="true" className="text-[#0000001A]">
               /
             </span>
-            <Link href="/products">Products</Link>  
+            <Link href="/products">Products</Link>
             <span aria-hidden="true" className="text-[#0000001A]">
               /
             </span>
@@ -570,8 +590,9 @@ export default async function ConfiguratorPage({
           </nav>
         </header>
 
-        <div className="grid grid-cols-1 gap-6 min-[1261px]:grid-cols-[minmax(300px,360px)_minmax(0,1fr)] min-[1261px]:items-start min-[1261px]:gap-8">
-          <section className="order-1 min-[1261px]:col-start-2 min-[1261px]:row-start-1">
+        <div className="grid grid-cols-1 gap-6 min-[1261px]:h-[calc(100dvh-8rem)] min-[1261px]:min-h-0 min-[1261px]:grid-cols-[minmax(300px,360px)_minmax(0,1fr)] min-[1261px]:items-stretch min-[1261px]:gap-8">
+          <div className="js-cfg-main-column contents min-[1261px]:col-start-2 min-[1261px]:row-start-1 min-[1261px]:flex min-[1261px]:min-h-0 min-[1261px]:flex-col min-[1261px]:gap-6 min-[1261px]:overflow-y-auto min-[1261px]:pr-2">
+          <section className="order-1">
             <div className="js-cfg-preview w-full overflow-hidden rounded-lg">
               {previewUrl ? (
                 <img
@@ -607,7 +628,204 @@ export default async function ConfiguratorPage({
             </div>
           </section>
 
-          <div className="js-cfg-sidebar order-2 flex flex-col gap-6 min-[1261px]:col-start-1 min-[1261px]:row-start-1 min-[1261px]:row-span-2 min-[1261px]:gap-8 min-[1261px]:self-start min-[1261px]:sticky min-[1261px]:top-24">
+          <section className="order-4 flex min-h-[360px] flex-col gap-4">
+            <h2 className="m-0 text-[18px] font-[700] leading-5 text-[#111827] min-[1261px]:hidden">
+              Available Products ({listFilteredVariants.length})
+            </h2>
+
+            <div className="cfg-sku-list-anchor">
+              <div className="cfg-sku-rows relative">
+                {skuDetail ? (
+                  <ConfiguratorSkuDetailPanel
+                    detail={skuDetail}
+                    closeHref={configuratorHref(
+                      product.slug,
+                      clearSkuParams.toString(),
+                    )}
+                  />
+                ) : null}
+
+                <div className="js-cfg-variant-list flex flex-col gap-3 min-[1261px]:gap-3">
+                  {pagedVariants.length === 0 ? (
+                    <div className="rounded-lg border border-[#eceef2] bg-white px-5 py-6">
+                      <span className="text-sm leading-5 text-[#6b7280]">
+                        No variants match these filters.
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {pagedVariants.map((variant) => {
+                    const detailParams = new URLSearchParams(
+                      urlParams.toString(),
+                    );
+                    detailParams.set("skuId", variant._id);
+                    const detailHref = configuratorHref(
+                      product.slug,
+                      detailParams.toString(),
+                    );
+
+                    return (
+                      <ConfiguratorVariantCard
+                        key={variant._id}
+                        variant={variant}
+                        nonSkuColumns={nonSkuColumns}
+                        detailHref={detailHref}
+                        getColumnValue={getColumnValue}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="js-cfg-pagination flex flex-wrap items-center justify-between gap-4 pt-4">
+                <p className="m-0 text-sm leading-5 text-[#6b7280]">
+                  {totalItems === 0 ? (
+                    "No results"
+                  ) : (
+                    <>
+                      Showing{" "}
+                      <span className="font-medium text-[#111827]">
+                        {firstItem}–{lastItem}
+                      </span>{" "}
+                      of{" "}
+                      <span className="font-medium text-[#111827]">
+                        {totalItems}
+                      </span>{" "}
+                      result{totalItems !== 1 ? "s" : ""}
+                    </>
+                  )}
+                </p>
+
+                {totalPages > 1 && (
+                  <nav
+                    aria-label="Pagination"
+                    className="inline-flex items-center gap-1"
+                  >
+                    {prevPageHref ? (
+                      <Link
+                        href={prevPageHref}
+                        scroll={false}
+                        aria-label="Previous page"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e5e7eb] bg-white text-[#6b7280] hover:border-[#d1d5db] hover:text-[#111827] transition-colors"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M10 12L6 8l4-4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </Link>
+                    ) : (
+                      <span
+                        aria-disabled="true"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e5e7eb] bg-white text-[#d1d5db] cursor-not-allowed"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M10 12L6 8l4-4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    )}
+
+                    {pageNumbers.map((p, i) =>
+                      p === "…" ? (
+                        <span
+                          key={`ellipsis-${i}`}
+                          className="inline-flex h-9 w-9 items-center justify-center text-sm text-[#9ca3af] select-none"
+                        >
+                          …
+                        </span>
+                      ) : (
+                        <Link
+                          key={p}
+                          href={pageHrefs[i]!}
+                          scroll={false}
+                          aria-label={`Page ${p}`}
+                          aria-current={p === safePage ? "page" : undefined}
+                          className={
+                            p === safePage
+                              ? "inline-flex h-9 w-9 items-center justify-center rounded-md border text-sm font-semibold border-[#FB612E] bg-[#FB612E] text-white"
+                              : "inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e5e7eb] bg-white text-sm font-medium text-[#374151] hover:border-[#d1d5db] hover:text-[#111827] transition-colors"
+                          }
+                        >
+                          {p}
+                        </Link>
+                      ),
+                    )}
+
+                    {nextPageHref ? (
+                      <Link
+                        href={nextPageHref}
+                        scroll={false}
+                        aria-label="Next page"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e5e7eb] bg-white text-[#6b7280] hover:border-[#d1d5db] hover:text-[#111827] transition-colors"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M6 4l4 4-4 4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </Link>
+                    ) : (
+                      <span
+                        aria-disabled="true"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e5e7eb] bg-white text-[#d1d5db] cursor-not-allowed"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M6 4l4 4-4 4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    )}
+                  </nav>
+                )}
+              </div>
+            </div>
+          </section>
+          </div>
+
+          <div className="js-cfg-sidebar order-2 flex flex-col gap-6 min-[1261px]:col-start-1 min-[1261px]:row-start-1 min-[1261px]:min-h-0 min-[1261px]:gap-8 min-[1261px]:overflow-y-auto min-[1261px]:pr-2">
             <section>
               <div className="mb-4 flex items-start justify-between gap-3">
                 <h2 className="m-0 text-sm font-bold leading-5 text-[#111827]">
@@ -655,6 +873,7 @@ export default async function ConfiguratorPage({
             </div>
           </div>
 
+          {/* Mobile filter sheet — hidden on desktop */}
           <div className="order-3 min-[1261px]:hidden">
             <ConfiguratorMobileFiltersSheet clearFiltersHref={clearFiltersHref}>
               <ConfiguratorFilterPanel
@@ -663,90 +882,6 @@ export default async function ConfiguratorPage({
               />
             </ConfiguratorMobileFiltersSheet>
           </div>
-
-          <section className="order-4 flex min-h-[360px] flex-col gap-4 min-[1261px]:col-start-2 min-[1261px]:row-start-2">
-            <h2 className="m-0 text-[18px] font-[700] leading-5 text-[#111827] min-[1261px]:hidden">
-              Available Products ({listFilteredVariants.length})
-            </h2>
-
-            <div className="cfg-sku-list-anchor">
-              <div className="cfg-sku-rows relative">
-                {skuDetail ? (
-                  <ConfiguratorSkuDetailPanel
-                    detail={skuDetail}
-                    closeHref={configuratorHref(
-                      product.slug,
-                      clearSkuParams.toString(),
-                    )}
-                  />
-                ) : null}
-
-                <div className="js-cfg-variant-list flex flex-col gap-3 min-[1261px]:gap-3">
-                {pagedVariants.length === 0 ? (
-                  <div className="rounded-lg border border-[#eceef2] bg-white px-5 py-6">
-                    <span className="text-sm leading-5 text-[#6b7280]">
-                      No variants match these filters.
-                    </span>
-                  </div>
-                ) : null}
-
-                {pagedVariants.map((variant) => {
-                  const detailParams = new URLSearchParams(urlParams.toString());
-                  detailParams.set("skuId", variant._id);
-                  const detailHref = configuratorHref(
-                    product.slug,
-                    detailParams.toString(),
-                  );
-
-                  return (
-                    <ConfiguratorVariantCard
-                      key={variant._id}
-                      variant={variant}
-                      nonSkuColumns={nonSkuColumns}
-                      detailHref={detailHref}
-                      getColumnValue={getColumnValue}
-                    />
-                  );
-                })}
-                </div>
-              </div>
-
-              <div className="js-cfg-pagination flex flex-wrap items-center justify-between gap-4 pt-1">
-                <p className="m-0 text-sm leading-5 text-[#6b7280]">
-                  Page {safePage} of {totalPages}
-                </p>
-
-                <div className="inline-flex gap-2">
-                  {prevPageHref ? (
-                    <Link
-                      href={prevPageHref}
-                      scroll={false}
-                      className="inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] hover:border-[#d1d5db]"
-                    >
-                      Previous
-                    </Link>
-                  ) : (
-                    <span className="pointer-events-none inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] opacity-45">
-                      Previous
-                    </span>
-                  )}
-                  {nextPageHref ? (
-                    <Link
-                      href={nextPageHref}
-                      scroll={false}
-                      className="inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] hover:border-[#d1d5db]"
-                    >
-                      Next
-                    </Link>
-                  ) : (
-                    <span className="pointer-events-none inline-flex min-h-10 min-w-[104px] items-center justify-center rounded-md border border-[#e5e7eb] bg-white px-4 text-sm font-medium text-[#111827] opacity-45">
-                      Next
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
       <ConfiguratorPageAnimations />

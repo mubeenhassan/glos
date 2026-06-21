@@ -55,9 +55,9 @@ export default function ConfiguratorFilterPanel({
 }: ConfiguratorFilterPanelProps) {
   return (
     <>
-      <div className="flex flex-col items-start gap-4">
+      <div className="flex flex-col items-start gap-4 border-b border-[#e5e7eb] pb-4">
         <div className="flex w-full items-start justify-between gap-3">
-          <h2 className="m-0 text-sm font-bold leading-5 text-[#111827]">{sidebarTitle}</h2>
+          <h2 className="m-0 text-base font-bold leading-5 text-[#111827]">{sidebarTitle}</h2>
           {showClearInHeader && hasActiveFilters ? (
             <Link
               className="whitespace-nowrap text-sm font-semibold text-[#FB612E] hover:text-[#FB612E]"
@@ -112,29 +112,31 @@ export default function ConfiguratorFilterPanel({
         ) : null}
       </div>
 
-      {filterDefinitions.map((definition) => {
-        const numericMeta = numericFilterMetaByDefinitionKey.get(definition.key)
-        const definitionOptions =
-          definition.valueType === 'number'
-            ? (numericFilterOptionsByDefinitionKey.get(definition.key) ?? [])
-            : (optionsByDefinition.get(definition._id) ?? [])
-        const selected = activeFilters[definition.key] || []
-        const singleSelect = definition.valueType === 'singleOption'
+      <div className="flex flex-col divide-y divide-[#e5e7eb]">
+        {filterDefinitions.map((definition) => {
+          const numericMeta = numericFilterMetaByDefinitionKey.get(definition.key)
+          const definitionOptions =
+            definition.valueType === 'number'
+              ? (numericFilterOptionsByDefinitionKey.get(definition.key) ?? [])
+              : (optionsByDefinition.get(definition._id) ?? [])
+          const selected = activeFilters[definition.key] || []
+          const singleSelect = definition.valueType === 'singleOption'
 
-        return (
-          <ConfiguratorFilterSection
-            key={definition._id}
-            definition={definition}
-            options={definitionOptions}
-            selected={selected}
-            singleSelect={singleSelect}
-            lockFiltersToSelectedSku={lockFiltersToSelectedSku}
-            productSlug={productSlug}
-            urlParams={urlParams}
-            numericMeta={numericMeta}
-          />
-        )
-      })}
+          return (
+            <ConfiguratorFilterSection
+              key={definition._id}
+              definition={definition}
+              options={definitionOptions}
+              selected={selected}
+              singleSelect={singleSelect}
+              lockFiltersToSelectedSku={lockFiltersToSelectedSku}
+              productSlug={productSlug}
+              urlParams={urlParams}
+              numericMeta={numericMeta}
+            />
+          )
+        })}
+      </div>
     </>
   )
 }

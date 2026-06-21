@@ -10,7 +10,6 @@ import {
 import {
   colourTemperatureSwatchColor,
   finishSwatchColor,
-  getConfiguratorChipGridClass,
   getConfiguratorFilterLayout,
   splitModelOptionLabel,
 } from '@/lib/configuratorDisplay'
@@ -118,8 +117,8 @@ export default function ConfiguratorFilterSection({
   const layout = getConfiguratorFilterLayout(definition)
 
   return (
-    <section className="flex flex-col gap-3">
-      <h5 className="m-0 text-sm font-bold leading-5 text-[#111827]">{definition.title}</h5>
+    <section className="flex flex-col gap-3 py-5 first:pt-0 last:pb-0">
+      <h5 className="m-0 text-[11px] font-semibold uppercase tracking-widest text-[#6b7280]">{definition.title}</h5>
 
       {layout === 'range' ? (
         lockFiltersToSelectedSku && numericMeta ? (
@@ -284,6 +283,7 @@ export default function ConfiguratorFilterSection({
                   productSlug,
                   toggleFilter(urlParams, definition, token, singleSelect),
                 )
+            const swatchImageUrl = sanityImageUrl(option.swatchImage, 160)
 
             return (
               <FilterOptionLink
@@ -293,13 +293,20 @@ export default function ConfiguratorFilterSection({
                 disabled={isDisabled}
                 className={finishCardClass(active, isDisabled)}
               >
+                {swatchImageUrl ? (
+                  <span
+                    className="h-10 w-full rounded-md bg-contain bg-center bg-no-repeat"
+                    style={{backgroundImage: `url(${swatchImageUrl})`}}
+                    aria-hidden="true"
+                  />
+                ) : null}
                 <span className="text-xs leading-4">{option.label}</span>
               </FilterOptionLink>
             )
           })}
         </div>
       ) : (
-        <div className={cx('grid gap-2', getConfiguratorChipGridClass(definition))}>
+        <div className="flex flex-wrap gap-1.5">
           {options.map((option) => {
             const token = valueToToken(option.value)
             const active = selected.includes(token)

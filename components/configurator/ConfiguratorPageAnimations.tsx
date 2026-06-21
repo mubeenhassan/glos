@@ -39,6 +39,10 @@ export default function ConfiguratorPageAnimations() {
       const variants = gsap.utils.toArray<HTMLElement>('.js-cfg-variant', page)
       const variantList = page.querySelector<HTMLElement>('.js-cfg-variant-list')
       const pagination = page.querySelector<HTMLElement>('.js-cfg-pagination')
+      const mainColumn = page.querySelector<HTMLElement>('.js-cfg-main-column')
+      const desktopScroller = window.matchMedia('(min-width: 1261px)').matches
+        ? mainColumn ?? undefined
+        : undefined
 
       if (title) {
         gsap.set(title, {
@@ -147,6 +151,7 @@ export default function ConfiguratorPageAnimations() {
         gsap.to(variants, {
           scrollTrigger: {
             trigger: variantList,
+            scroller: desktopScroller,
             start: 'top 88%',
             once: true,
           },
@@ -165,6 +170,7 @@ export default function ConfiguratorPageAnimations() {
         gsap.to(pagination, {
           scrollTrigger: {
             trigger: pagination,
+            scroller: desktopScroller,
             start: 'top 94%',
             once: true,
           },

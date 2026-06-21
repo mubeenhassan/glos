@@ -55,7 +55,8 @@ export async function GET(request: NextRequest) {
   }
 
   const redirectTo = resolveRedirectPath(
-    request.nextUrl.searchParams.get('preview') ??
+    request.nextUrl.searchParams.get('sanity-preview-pathname') ??
+      request.nextUrl.searchParams.get('preview') ??
       request.nextUrl.searchParams.get('path') ??
       request.nextUrl.searchParams.get('slug') ??
       request.nextUrl.searchParams.get('redirect'),

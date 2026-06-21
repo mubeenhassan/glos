@@ -47,6 +47,10 @@ export function getConfiguratorFilterLayout(
     return 'swatch'
   }
 
+  if (control === 'model') {
+    return 'model'
+  }
+
   if (key === 'colourtemperature' || title === 'colourtemperature') {
     return 'colour'
   }

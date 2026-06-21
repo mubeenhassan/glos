@@ -24,7 +24,72 @@ type SanityFetchOptions = {
   revalidate?: number
 }
 
-const stegaExcludedFieldNames = new Set(['sku', 'value'])
+// Fields that must never be stega-encoded:
+// - enum / option values used in JS comparisons or as CSS/HTML attributes
+// - technical identifiers used in routing, filtering, or API lookups
+// - computed fields that contain numeric or path data
+// Encoding these causes the Visual Editor scanner to find corrupt watermarks
+// when the strings are processed (compared, split, used in URLs, etc.)
+const stegaExcludedFieldNames = new Set([
+  // Already excluded
+  'sku',
+  'value',
+
+  // Enum / discriminator fields
+  'type',
+  'status',
+  'scope',
+  'mode',
+  'platform',
+  'language',
+  'valueType',
+  'uiControl',
+  'displayGroup',
+  'linkType',
+  'titleLinkType',
+  'contentAlignment',
+  'imagePosition',
+  'tone',
+  'variant',
+  'fieldType',
+  'embedInputType',
+  'defaultSort',
+
+  // Technical identifiers
+  'key',
+  'name',
+  'slug',
+  'errorCode',
+  'definitionRef',
+
+  // CSS / visual values
+  'swatchHex',
+  'color',
+
+  // Computed / derived strings
+  'numberTextValue',
+
+  // Path / URL fields (filterDefault covers http URLs but not internal paths)
+  'internalPath',
+  'titlePath',
+])
+
+// Path segments whose entire subtree should be excluded from stega.
+// Option labels and attribute selections are used in JS comparisons and
+// filter logic — encoding them produces corrupt watermarks on any string
+// processing (comparison, slice, concatenation, URL encoding, etc.).
+const stegaExcludedPathSegments = new Set([
+  'singleOptionValue',
+  'multiOptionValues',
+  'configSelections',
+  'specAttributes',
+  'productAttributes',
+  'options',
+  'filterDefinitions',
+  'cardAttributeDefinitions',
+  'tableColumns',
+  'defaultVisibleColumns',
+])
 
 export type SanityImage = {
   _type?: 'image'
@@ -60,9 +125,25 @@ export async function fetchSanity<T>(
       studioUrl,
       filter: (props) => {
         const segment = props.sourcePath.at(-1)
+
+        // Exclude by field name
         if (typeof segment === 'string' && stegaExcludedFieldNames.has(segment)) {
           return false
         }
+
+        // Exclude entire option/selection subtrees — attribute option labels and
+        // config-selection values are used in filter logic, not click-to-edit.
+        // Encoding short option strings produces watermarks that break on any
+        // string processing, causing the 180+ decode errors in the Visual Editor.
+        const pathStrings = props.sourcePath.filter((s): s is string => typeof s === 'string')
+        if (
+          pathStrings.some((s) =>
+            stegaExcludedPathSegments.has(s),
+          )
+        ) {
+          return false
+        }
+
         return props.filterDefault(props)
       },
     },

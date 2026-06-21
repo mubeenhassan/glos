@@ -152,7 +152,6 @@ export type ConfiguratorConfig = {
   filterDefinitions: AttributeDefinition[]
   tableColumns: AttributeDefinition[]
   defaultVisibleColumns: AttributeDefinition[]
-  pageSizeOptions: number[]
   defaultPageSize: number
   enableSkuSearch?: boolean
   enableStockOnlyToggle?: boolean
@@ -185,7 +184,6 @@ const DEFAULT_CONFIGURATOR_CONFIG: ConfiguratorConfig = {
   filterDefinitions: [],
   tableColumns: [],
   defaultVisibleColumns: [],
-  pageSizeOptions: [20, 50, 100],
   defaultPageSize: 20,
   enableSkuSearch: true,
   enableStockOnlyToggle: true,
@@ -515,7 +513,6 @@ const CONFIGURATOR_QUERY = `{
     "filterDefinitions": filterDefinitions[]->{_id, key, title, valueType, uiControl, unit},
     "tableColumns": tableColumns[]->{_id, key, title, valueType, uiControl, unit, displayGroup, displayOrder},
     "defaultVisibleColumns": defaultVisibleColumns[]->{_id, key, title, valueType, uiControl, unit},
-    pageSizeOptions,
     defaultPageSize,
     enableSkuSearch,
     enableStockOnlyToggle
@@ -587,7 +584,6 @@ export async function getConfiguratorBySlug(slug: string) {
       filterDefinitions: normalizedFilterDefinitions,
       tableColumns: normalizedTableColumns,
       defaultVisibleColumns: normalizedVisibleColumns,
-      pageSizeOptions: config.pageSizeOptions ?? DEFAULT_CONFIGURATOR_CONFIG.pageSizeOptions,
       defaultPageSize: config.defaultPageSize ?? DEFAULT_CONFIGURATOR_CONFIG.defaultPageSize,
       enableSkuSearch: config.enableSkuSearch ?? DEFAULT_CONFIGURATOR_CONFIG.enableSkuSearch,
       enableStockOnlyToggle:
